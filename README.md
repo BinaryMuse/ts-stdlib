@@ -5,7 +5,7 @@
 The library includes:
 
 * [`Option<T>`](#optiont) - a type that represents a value (`Some<T>`) or the absence of one (`None`)
-* [`Result<T, E>`](#resultt-e) - a type that represents a successful result (`Ok<T>`) or an err (`Err<E>`)
+* [`Result<T, E>`](#resultt-e) - a type that represents a successful result (`Ok<T>`) or an error (`Err<E>`)
 * `Rc<T>` - a reference counted resource
 
 ## Installation
