@@ -133,6 +133,8 @@ An `Option<T>` has two variants:
 import { Result, Ok, Err } from "@binarymuse/ts-stdlib"
 ```
 
+For a longer guide on using `Result<T, E>`, [see docs/result.md](docs/result.md).
+
 A `Result<T, E>` has two variants:
 
 * `Ok<T>`, representing a successful result containing a value of type `T`
