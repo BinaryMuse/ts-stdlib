@@ -72,6 +72,8 @@ describe("Option", () => {
 
     expect(some.map((x) => x + 1).unwrap()).toEqual(2);
     expect(none.map((x) => x + 1)).toEqual(None);
+
+    expect(some.map((_x) => null)).toEqual(None);
   });
 
   it("mapOr", () => {
@@ -80,6 +82,8 @@ describe("Option", () => {
 
     expect(some.mapOr(5, (x) => x + 1).unwrap()).toEqual(2);
     expect(none.mapOr(5, (x) => x + 1).unwrap()).toEqual(5);
+
+    expect(some.mapOr(5, (_x) => null)).toEqual(None);
   });
 
   it("mapOrElse", () => {
@@ -98,6 +102,13 @@ describe("Option", () => {
 
     expect(mappedSome.unwrap()).toEqual(2);
     expect(mappedNone.unwrap()).toEqual(5);
+
+    expect(
+      none.mapOrElse(
+        () => null,
+        (x) => x + 1
+      )
+    ).toEqual(None);
   });
 
   it("and", () => {
