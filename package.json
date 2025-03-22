@@ -1,6 +1,6 @@
 {
-  "name": "ts-stdlib",
-  "version": "0.0.1",
+  "name": "@binarymuse/ts-stdlib",
+  "version": "0.0.0",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "test": "vitest",
+    "publish": "pnpm publish --access=public",
     "prepublish": "pnpm build",
     "build": "rm -r dist && tsc"
   },

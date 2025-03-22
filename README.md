@@ -1,12 +1,22 @@
 # ts-stdlib
 
-`ts-stdlib` is a set of classes, utilities, and types to make working with TypeScript a little bit nicer. These concepts can be found in many different languages, although many of the implementations here are inspired by Rust.
+`@binarymuse/ts-stdlib` is a set of classes, utilities, and types to make working with TypeScript a little bit nicer. These concepts can be found in many different languages, although many of the implementations here are inspired by Rust.
 
 The library includes:
 
 * `Option<T>` - a type that represents a value (`Some<T>`) or the absense of one (`None`)
 * `Result<T, E>` - a type that represents a successful result (`Ok<T>`) or an err (`Err<E>`)
 * `Rc<T>` - a reference counted resource
+
+## Installation
+
+```
+npm install @binarymuse/ts-stdlib
+# or
+pnpm add @binarymuse/ts-stdlib
+# or
+yarn add @binarymuse/ts-stdlib
+```
 
 ## `Option<T>`
 
