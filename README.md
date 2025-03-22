@@ -4,7 +4,7 @@
 
 The library includes:
 
-* `Option<T>` - a type that represents a value (`Some<T>`) or the absense of one (`None`)
+* `Option<T>` - a type that represents a value (`Some<T>`) or the absence of one (`None`)
 * `Result<T, E>` - a type that represents a successful result (`Ok<T>`) or an err (`Err<E>`)
 * `Rc<T>` - a reference counted resource
 
@@ -23,7 +23,7 @@ yarn add @binarymuse/ts-stdlib
 An `Option<T>` has two variants:
 
 * `Some<T>`, representing the existance of the inner value
-* `None`, representing the absense of an inner value
+* `None`, representing the absence of an inner value
 
 ### Creating an option
 
