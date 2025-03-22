@@ -28,7 +28,7 @@
     "stdlib"
   ],
   "author": "Michelle Tilley <michelle@michelletilley.net>",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "typescript": "^5.8.2",
     "vitest": "^3.0.9"
