@@ -120,3 +120,122 @@ An `Option<T>` has two variants:
 * `Option<T>.flatten(): Option<T>`
 
   Converts from `Option<Option<T>>` to `Option<T>`. Only one level of nesting is removed.
+
+## `Result<T, E>`
+
+A `Result<T, E>` has two variants:
+
+* `Ok<T>`, representing a successful result containing a value of type `T`
+* `Err<E>`, representing an error containing a value of type `E`
+
+### Creating a result
+
+* `Ok<T, E = never>(value: T): Result<T, E>` - create an `Ok` result containing a success value
+* `Err<E, T = never>(error: E): Result<T, E>` - create an `Err` result containing an error value
+
+Since TypeScript can't infer the type of `E` (in the case of `Ok`) or the type of `T` (in the case of `Err`), it can be useful to explicitly define these types when creating the `Result`:
+
+```typescript
+const result1: Result<ValueType, ErrorType> = Ok(value);
+const result2: Result<ValueType, ErrorType> = Err(error);
+```
+
+### Querying the result
+
+* `Result<T, E>.isOk(): boolean`
+
+  Returns `true` if the result is `Ok`, `false` otherwise
+
+* `Result<T, E>.isOkAnd(fn: (value: T) => boolean): boolean`
+
+  Returns `true` if the result is `Ok` and calling `fn` with the inner value returns `true`, `false` otherwise
+
+* `Result<T, E>.isErr(): boolean`
+
+  Returns `true` if the result is `Err`, `false` otherwise
+
+* `Result<T, E>.isErrAnd(fn: (error: E) => boolean): boolean`
+
+  Returns `true` if the result is `Err` and calling `fn` with the error value returns `true`, `false` otherwise
+
+* `Result<T, E>.unwrap(): T`
+
+  Returns the underlying value if the result is `Ok`, otherwise throws an exception
+
+* `Result<T, E>.unwrapOr(defaultValue: T): T`
+
+  Returns the underlying value if the result is `Ok`, otherwise returns `defaultValue`
+
+* `Result<T, E>.unwrapOrElse(fn: () => T): T`
+
+  Returns the underlying value if the result is `Ok`, otherwise calls `fn` and returns its return value
+
+* `Result<T, E>.unwrapErr(): E`
+
+  Returns the error value if the result is `Err`, otherwise throws an exception
+
+* `Result<T, E>.expect(msg: string): T`
+
+  Returns the underlying value if the result is `Ok`, otherwise throws an exception with the provided message
+
+* `Result<T, E>.expectErr(msg: string): E`
+
+  Returns the error value if the result is `Err`, otherwise throws an exception with the provided message
+
+### Transforming results
+
+* `Result<T, E>.map<U>(fn: (value: T) => U): Result<U, E>`
+
+  Returns a `Result<U, E>` by mapping the success value of the source result with `fn`
+
+* `Result<T, E>.mapOr<U>(defaultValue: U, fn: (value: T) => U): Result<U, E>`
+
+  Returns a result wrapping the provided `defaultValue` if the source result is `Err`, or calls `fn` with the source result's success value and returns a new result wrapping its return value
+
+* `Result<T, E>.mapOrElse<U>(defaultFn: () => U, mapFn: (value: T) => U): Result<U, E>`
+
+  Returns a result wrapping the return value of `defaultFn` if the source result is `Err`, or calls `mapFn` with the source result's success value and returns a new result wrapping its return value
+
+* `Result<T, E>.mapErr<U>(fn: (error: E) => U): Result<T, U>`
+
+  Returns a `Result<T, U>` by mapping the error value of the source result with `fn`
+
+* `Result<T, E>.and<U>(other: Result<U, E>): Result<U, E>`
+
+  Returns `other` if the source result is `Ok`, otherwise returns the source result's error
+
+* `Result<T, E>.andThen<U>(fn: (value: T) => Result<U, E>): Result<U, E>`
+
+  Returns the error if the source result is `Err`, otherwise calls `fn` with the success value and returns the result
+
+* `Result<T, E>.or<U>(other: Result<U, E>): Result<U, E>`
+
+  Returns the source result if it is `Ok`, otherwise returns `other`
+
+* `Result<T, E>.orElse<U>(fn: () => Result<U, E>): Result<U, E>`
+
+  Returns the source result if it is `Ok`, otherwise calls `fn` and returns the result
+
+* `Result<T, E>.flatten(): Result<T, E>`
+
+  Converts from `Result<Result<T, E>, E>` to `Result<T, E>`. Only one level of nesting is removed.
+
+### Inspecting results
+
+* `Result<T, E>.inspect(fn: (value: T) => void): Result<T, E>`
+
+  Calls `fn` with the success value if the result is `Ok`, otherwise does nothing. Returns the original result.
+
+* `Result<T, E>.inspectErr(fn: (error: E) => void): Result<T, E>`
+
+  Calls `fn` with the error value if the result is `Err`, otherwise does nothing. Returns the original result.
+
+### Converting to options
+
+* `Result<T, E>.ok(): Option<T>`
+
+  Converts the `Result<T, E>` into an `Option<T>`, mapping `Ok(v)` to `Some(v)` and `Err(_)` to `None`
+
+* `Result<T, E>.err(): Option<E>`
+
+  Converts the `Result<T, E>` into an `Option<E>`, mapping `Ok(_)` to `None` and `Err(e)` to `Some(e)`
