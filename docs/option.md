@@ -1,6 +1,6 @@
 # Option
 
-An `Option` is a value that represents the existance (or lack thereof) of another value. You can think of it a bit like `null` or `undefined`. While TypeScript can enforce checking to ensure you don't use a `null` or `undefined` value, `Option` provides some additional functionality that can make it a nice alternative.
+An `Option<T>` is a value that represents the existance (or lack thereof) of another value. You can think of it a bit like `T | null` or `T | undefined`. While TypeScript can enforce checking to ensure you don't use a `null` or `undefined` value, `Option` provides some additional functionality that can make it a nice alternative.
 
 ## Overview
 
