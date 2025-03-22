@@ -4,8 +4,8 @@
 
 The library includes:
 
-* `Option<T>` - a type that represents a value (`Some<T>`) or the absence of one (`None`)
-* `Result<T, E>` - a type that represents a successful result (`Ok<T>`) or an err (`Err<E>`)
+* [`Option<T>`](#optiont) - a type that represents a value (`Some<T>`) or the absence of one (`None`)
+* [`Result<T, E>`](#resultt-e) - a type that represents a successful result (`Ok<T>`) or an err (`Err<E>`)
 * `Rc<T>` - a reference counted resource
 
 ## Installation
@@ -19,6 +19,8 @@ yarn add @binarymuse/ts-stdlib
 ```
 
 ## `Option<T>`
+
+For a longer guide on using `Option<T>`, [see docs/option.md](docs/option.md).
 
 An `Option<T>` has two variants:
 
