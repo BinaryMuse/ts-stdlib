@@ -44,326 +44,176 @@ type Err<T, E> = {
 
 export type Result<T, E> = Ok<T, E> | Err<T, E>;
 
+const OkPrototype: ResultMethods<any, any> = {
+  isOk(this: Ok<any, any>) {
+    return true;
+  },
+  isOkAnd<T, E>(this: Ok<T, E>, fn: (value: T) => boolean) {
+    return fn(this.value);
+  },
+  isErr(this: Ok<any, any>) {
+    return false;
+  },
+  isErrAnd<T, E>(this: Ok<T, E>, _fn: (error: E) => boolean) {
+    return false;
+  },
+  unwrap<T, E>(this: Ok<T, E>) {
+    return this.value;
+  },
+  unwrapOr<T, E>(this: Ok<T, E>, _defaultValue: T) {
+    return this.value;
+  },
+  unwrapOrElse<T, E>(this: Ok<T, E>, _fn: () => T) {
+    return this.value;
+  },
+  unwrapErr<T, E>(this: Ok<T, E>): never {
+    throw new Error(String(this.value));
+  },
+  expect<T, E>(this: Ok<T, E>, _msg: string) {
+    return this.value;
+  },
+  expectErr<T, E>(this: Ok<T, E>, msg: string): never {
+    throw new Error(msg);
+  },
+  and<T, E, U>(this: Ok<T, E>, other: Result<U, E>) {
+    return other;
+  },
+  andThen<T, E, U>(this: Ok<T, E>, fn: (value: T) => Result<U, E>) {
+    return fn(this.value);
+  },
+  or<T, E, U>(this: Ok<T, E>, _other: Result<U, E>) {
+    return this as unknown as Result<U, E>;
+  },
+  orElse<T, E, U>(this: Ok<T, E>, _fn: () => Result<U, E>) {
+    return this as unknown as Result<U, E>;
+  },
+  map<T, E, U>(this: Ok<T, E>, fn: (value: T) => U) {
+    return Ok<U, E>(fn(this.value));
+  },
+  mapOr<T, E, U>(this: Ok<T, E>, _defaultValue: U, fn: (value: T) => U) {
+    return Ok<U, E>(fn(this.value));
+  },
+  mapOrElse<T, E, U>(
+    this: Ok<T, E>,
+    _defaultFn: () => U,
+    mapFn: (value: T) => U
+  ) {
+    return Ok<U, E>(mapFn(this.value));
+  },
+  mapErr<T, E, U>(this: Ok<T, E>, _fn: (error: E) => U) {
+    return this as unknown as Result<T, U>;
+  },
+  flatten<T, E>(this: Ok<T, E>) {
+    if (
+      (this.value as any)._type === OkMarker ||
+      (this.value as any)._type === ErrMarker
+    ) {
+      return this.value as Result<T, E>;
+    }
+    return this;
+  },
+  inspect<T, E>(this: Ok<T, E>, fn: (value: T) => void) {
+    fn(this.value);
+    return this;
+  },
+  inspectErr<T, E>(this: Ok<T, E>, _fn: (error: E) => void) {
+    return this;
+  },
+  ok<T, E>(this: Ok<T, E>) {
+    return Some(this.value);
+  },
+  err<T, E>(this: Ok<T, E>) {
+    return None;
+  },
+};
+
+const ErrPrototype: ResultMethods<any, any> = {
+  isOk(this: Err<any, any>) {
+    return false;
+  },
+  isOkAnd<T, E>(this: Err<T, E>, _fn: (value: T) => boolean) {
+    return false;
+  },
+  isErr(this: Err<any, any>) {
+    return true;
+  },
+  isErrAnd<T, E>(this: Err<T, E>, fn: (error: E) => boolean) {
+    return fn(this.error);
+  },
+  unwrap<T, E>(this: Err<T, E>): never {
+    throw new Error("Tried to unwrap Err");
+  },
+  unwrapOr<T, E>(this: Err<T, E>, defaultValue: T) {
+    return defaultValue;
+  },
+  unwrapOrElse<T, E>(this: Err<T, E>, fn: () => T) {
+    return fn();
+  },
+  unwrapErr<T, E>(this: Err<T, E>) {
+    return this.error;
+  },
+  expect<T, E>(this: Err<T, E>, msg: string): never {
+    throw new Error(msg);
+  },
+  expectErr<T, E>(this: Err<T, E>, _msg: string) {
+    return this.error;
+  },
+  and<T, E, U>(this: Err<T, E>, _other: Result<U, E>) {
+    return this as unknown as Result<U, E>;
+  },
+  andThen<T, E, U>(this: Err<T, E>, _fn: (value: T) => Result<U, E>) {
+    return this as unknown as Result<U, E>;
+  },
+  or<T, E, U>(this: Err<T, E>, other: Result<U, E>) {
+    return other;
+  },
+  orElse<T, E, U>(this: Err<T, E>, fn: () => Result<U, E>) {
+    return fn();
+  },
+  map<T, E, U>(this: Err<T, E>, _fn: (value: T) => U) {
+    return this as unknown as Result<U, E>;
+  },
+  mapOr<T, E, U>(this: Err<T, E>, defaultValue: U, _mapFn: (value: T) => U) {
+    return Ok<U, E>(defaultValue);
+  },
+  mapOrElse<T, E, U>(
+    this: Err<T, E>,
+    defaultFn: () => U,
+    _mapFn: (value: T) => U
+  ) {
+    return Ok<U, E>(defaultFn());
+  },
+  mapErr<T, E, U>(this: Err<T, E>, fn: (error: E) => U) {
+    return Err<U, T>(fn(this.error));
+  },
+  flatten<T, E>(this: Err<T, E>) {
+    return this;
+  },
+  inspect<T, E>(this: Err<T, E>, _fn: (value: T) => void) {
+    return this;
+  },
+  inspectErr<T, E>(this: Err<T, E>, fn: (error: E) => void) {
+    fn(this.error);
+    return this;
+  },
+  ok<T, E>(this: Err<T, E>) {
+    return None;
+  },
+  err<T, E>(this: Err<T, E>) {
+    return Some(this.error);
+  },
+};
+
 export function Ok<T, E = never>(value: T): Result<T, E> {
-  const ret = {
-    _type: OkMarker,
-    value,
-  };
-
-  Object.defineProperties(ret, {
-    isOk: {
-      enumerable: false,
-      value: function (): boolean {
-        return true;
-      },
-    },
-    isOkAnd: {
-      enumerable: false,
-      value: function (fn: (value: T) => boolean): boolean {
-        return fn(this.value);
-      },
-    },
-    isErr: {
-      enumerable: false,
-      value: function (): boolean {
-        return false;
-      },
-    },
-    isErrAnd: {
-      enumerable: false,
-      value: function (_fn: (error: E) => boolean): boolean {
-        return false;
-      },
-    },
-    unwrap: {
-      enumerable: false,
-      value: function (): T {
-        return this.value;
-      },
-    },
-    unwrapOr: {
-      enumerable: false,
-      value: function (_defaultValue: T): T {
-        return this.value;
-      },
-    },
-    unwrapOrElse: {
-      enumerable: false,
-      value: function (_fn: () => T): T {
-        return this.value;
-      },
-    },
-    unwrapErr: {
-      enumerable: false,
-      value: function (): never {
-        throw new Error(this.value);
-      },
-    },
-    expect: {
-      enumerable: false,
-      value: function (_msg: string): T {
-        return this.value;
-      },
-    },
-    expectErr: {
-      enumerable: false,
-      value: function (msg: string): never {
-        throw new Error(msg);
-      },
-    },
-
-    and: {
-      enumerable: false,
-      value: function <U>(other: Result<U, E>): Result<U, E> {
-        return other;
-      },
-    },
-    andThen: {
-      enumerable: false,
-      value: function <U>(fn: (value: T) => Result<U, E>): Result<U, E> {
-        return fn(this.value);
-      },
-    },
-    or: {
-      enumerable: false,
-      value: function <U>(_other: Result<U, E>): Result<U, E> {
-        return this;
-      },
-    },
-    orElse: {
-      enumerable: false,
-      value: function <U>(_fn: () => Result<U, E>): Result<U, E> {
-        return this;
-      },
-    },
-    map: {
-      enumerable: false,
-      value: function <U>(fn: (value: T) => U): Result<U, E> {
-        return Ok(fn(this.value));
-      },
-    },
-    mapOr: {
-      enumerable: false,
-      value: function <U>(_defaultValue: U, fn: (value: T) => U): Result<U, E> {
-        return Ok(fn(this.value));
-      },
-    },
-    mapOrElse: {
-      enumerable: false,
-      value: function <U>(
-        _defaultFn: () => U,
-        mapFn: (value: T) => U
-      ): Result<U, E> {
-        return Ok(mapFn(this.value));
-      },
-    },
-    mapErr: {
-      enumerable: false,
-      value: function <U>(_fn: (error: E) => U): Result<T, U> {
-        return this;
-      },
-    },
-    flatten: {
-      enumerable: false,
-      value: function (): Result<T, E> {
-        if (
-          (this.value as any)._type === OkMarker ||
-          (this.value as any)._type === ErrMarker
-        ) {
-          return this.value as Result<T, E>;
-        }
-
-        return this as Result<T, E>;
-      },
-    },
-
-    inspect: {
-      enumerable: false,
-      value: function <E>(fn: (value: T) => void): Result<T, E> {
-        fn(this.value);
-        return this;
-      },
-    },
-    inspectErr: {
-      enumerable: false,
-      value: function <E>(_fn: (error: E) => void): Result<T, E> {
-        return this;
-      },
-    },
-
-    ok: {
-      enumerable: false,
-      value: function (): Option<T> {
-        return Some(this.value);
-      },
-    },
-    err: {
-      enumerable: false,
-      value: function <E>(): Option<E> {
-        return None;
-      },
-    },
+  return Object.create(OkPrototype, {
+    _type: { value: OkMarker, enumerable: true, writable: false },
+    value: { value, enumerable: true, writable: false },
   });
-
-  return ret as Result<T, E>;
 }
 
 export function Err<E, T = never>(error: E): Result<T, E> {
-  const ret = {
-    _type: ErrMarker,
-    error,
-  };
-
-  Object.defineProperties(ret, {
-    isOk: {
-      enumerable: false,
-      value: function (): boolean {
-        return false;
-      },
-    },
-    isOkAnd: {
-      enumerable: false,
-      value: function (_fn: (value: T) => boolean): boolean {
-        return false;
-      },
-    },
-    isErr: {
-      enumerable: false,
-      value: function (): boolean {
-        return true;
-      },
-    },
-    isErrAnd: {
-      enumerable: false,
-      value: function (fn: (error: E) => boolean): boolean {
-        return fn(this.error);
-      },
-    },
-    unwrap: {
-      enumerable: false,
-      value: function (): E {
-        throw new Error("Tried to unwrap Err");
-      },
-    },
-    unwrapOr: {
-      enumerable: false,
-      value: function <T>(defaultValue: T): T {
-        return defaultValue;
-      },
-    },
-    unwrapOrElse: {
-      enumerable: false,
-      value: function <T>(_fn: () => T): T {
-        return _fn();
-      },
-    },
-    unwrapErr: {
-      enumerable: false,
-      value: function (): E {
-        return this.error;
-      },
-    },
-    expect: {
-      enumerable: false,
-      value: function (msg: string): E {
-        throw new Error(msg);
-      },
-    },
-    expectErr: {
-      enumerable: false,
-      value: function (_msg: string): E {
-        return this.error;
-      },
-    },
-
-    and: {
-      enumerable: false,
-      value: function <U>(_other: Result<U, E>): Result<U, E> {
-        return this;
-      },
-    },
-    andThen: {
-      enumerable: false,
-      value: function <U>(_fn: (value: T) => Result<U, E>): Result<U, E> {
-        return this;
-      },
-    },
-    or: {
-      enumerable: false,
-      value: function <U>(other: Result<U, E>): Result<U, E> {
-        return other;
-      },
-    },
-    orElse: {
-      enumerable: false,
-      value: function <U>(fn: () => Result<U, E>): Result<U, E> {
-        return fn();
-      },
-    },
-    map: {
-      enumerable: false,
-      value: function <U>(_fn: (value: T) => U): Result<U, E> {
-        return this;
-      },
-    },
-    mapOr: {
-      enumerable: false,
-      value: function <U>(
-        defaultValue: U,
-        _mapFn: (value: T) => U
-      ): Result<U, E> {
-        return Ok(defaultValue);
-      },
-    },
-    mapOrElse: {
-      enumerable: false,
-      value: function <U>(
-        defaultFn: () => U,
-        _mapFn: (value: T) => U
-      ): Result<U, E> {
-        return Ok(defaultFn());
-      },
-    },
-    mapErr: {
-      enumerable: false,
-      value: function <U>(fn: (error: E) => U): Result<T, U> {
-        return Err(fn(this.error));
-      },
-    },
-    flatten: {
-      enumerable: false,
-      value: function (): Result<T, E> {
-        return this;
-      },
-    },
-
-    inspect: {
-      enumerable: false,
-      value: function <T>(_fn: (value: T) => void): Result<T, E> {
-        return this;
-      },
-    },
-    inspectErr: {
-      enumerable: false,
-      value: function (fn: (error: E) => void): Result<any, E> {
-        fn(this.error);
-        return this;
-      },
-    },
-
-    ok: {
-      enumerable: false,
-      value: function <T>(): Option<T> {
-        return None;
-      },
-    },
-    err: {
-      enumerable: false,
-      value: function (): Option<E> {
-        return Some(this.error);
-      },
-    },
+  return Object.create(ErrPrototype, {
+    _type: { value: ErrMarker, enumerable: true, writable: false },
+    error: { value: error, enumerable: true, writable: false },
   });
-
-  return ret as Result<any, E>;
 }

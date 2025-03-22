@@ -78,7 +78,7 @@ describe("Option", () => {
 
   it("mapOr", () => {
     const some = Some(1);
-    const none = None;
+    const none: Option<number> = None;
 
     expect(some.mapOr(5, (x) => x + 1).unwrap()).toEqual(2);
     expect(none.mapOr(5, (x) => x + 1).unwrap()).toEqual(5);
@@ -88,7 +88,7 @@ describe("Option", () => {
 
   it("mapOrElse", () => {
     const some = Some(1);
-    const none = None;
+    const none: Option<number> = None;
 
     const mappedSome = some.mapOrElse(
       () => 5,
