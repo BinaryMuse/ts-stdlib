@@ -20,8 +20,8 @@
     "prepublish": "pnpm build",
     "build": "rm -r dist && tsc"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["typescript", "option", "result", "rc", "stdlib"],
+  "author": "Michelle Tilley <michelle@michelletilley.net>",
   "license": "ISC",
   "devDependencies": {
     "typescript": "^5.8.2",
