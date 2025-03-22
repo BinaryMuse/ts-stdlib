@@ -20,6 +20,10 @@ yarn add @binarymuse/ts-stdlib
 
 ## `Option<T>`
 
+```typescript
+import { Option, Some, None } from "@binarymuse/ts-stdlib"
+```
+
 For a longer guide on using `Option<T>`, [see docs/option.md](docs/option.md).
 
 An `Option<T>` has two variants:
@@ -124,6 +128,10 @@ An `Option<T>` has two variants:
   Converts from `Option<Option<T>>` to `Option<T>`. Only one level of nesting is removed.
 
 ## `Result<T, E>`
+
+```typescript
+import { Result, Ok, Err } from "@binarymuse/ts-stdlib"
+```
 
 A `Result<T, E>` has two variants:
 
