@@ -1,6 +1,6 @@
 {
   "name": "@binarymuse/ts-stdlib",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "A collection of useful utility types for TypeScript, including Option, Result, and more",
   "repository": {
     "type": "git",
@@ -20,7 +20,13 @@
     "prepublish": "pnpm build",
     "build": "rm -r dist && tsc"
   },
-  "keywords": ["typescript", "option", "result", "rc", "stdlib"],
+  "keywords": [
+    "typescript",
+    "option",
+    "result",
+    "rc",
+    "stdlib"
+  ],
   "author": "Michelle Tilley <michelle@michelletilley.net>",
   "license": "ISC",
   "devDependencies": {
