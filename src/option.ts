@@ -1,3 +1,5 @@
+import { Err, Ok, Result } from "./result";
+
 interface OptionMethods<T> {
   isSome: () => boolean;
   isSomeAnd: (fn: (value: T) => boolean) => boolean;
@@ -19,14 +21,17 @@ interface OptionMethods<T> {
   filter: (fn: (value: T) => boolean) => Option<T>;
   flatten: () => Option<T>;
 
+  okOr: <E>(defaultValue: E) => Result<T, E>;
+  okOrElse: <E>(fn: () => E) => Result<T, E>;
+
   match: <U>(cases: { some: (value: T) => U; none: () => U }) => U;
 
   equals: (other: Option<T>) => boolean;
   strictEquals: (other: Option<T>) => boolean;
 }
 
-const SomeMarker = Symbol("Some");
-const NoneMarker = Symbol("None");
+export const SomeMarker = Symbol("Some");
+export const NoneMarker = Symbol("None");
 
 type None<T> = {
   readonly _type: typeof NoneMarker;
@@ -162,12 +167,26 @@ export function Some<T>(value: T): Option<T> {
     flatten: {
       enumerable: false,
       value: function (): Option<T> {
-        if (this.isSome() && (this.value as Some<T>)._type === SomeMarker) {
+        if ((this.value as Some<T>)._type === SomeMarker) {
           return this.value as Some<T>;
         }
         return this;
       },
     },
+
+    okOr: {
+      enumerable: false,
+      value: function <E>(_defaultValue: E): Result<T, E> {
+        return Ok(this.value);
+      },
+    },
+    okOrElse: {
+      enumerable: false,
+      value: function <E>(_fn: () => E): Result<T, E> {
+        return Ok(this.value);
+      },
+    },
+
     match: {
       enumerable: false,
       value: function <U>(cases: { some: (value: T) => U; none: () => U }): U {
@@ -334,6 +353,20 @@ function NoneFn<T>(): Option<T> {
         return None;
       },
     },
+
+    okOr: {
+      enumerable: false,
+      value: function <E>(error: E): Result<T, E> {
+        return Err(error);
+      },
+    },
+    okOrElse: {
+      enumerable: false,
+      value: function <E>(fn: () => E): Result<T, E> {
+        return Err(fn());
+      },
+    },
+
     match: {
       enumerable: false,
       value: function <U>(cases: { some: (value: T) => U; none: () => U }): U {

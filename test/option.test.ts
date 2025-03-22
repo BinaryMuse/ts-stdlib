@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Option, Some, None } from "../src/option";
+import { Option, Some, None } from "../src/";
 
 describe("Option", () => {
   it("isSome and isNone", () => {
@@ -182,6 +182,26 @@ describe("Option", () => {
     // flatten only unwraps one level of nesting
     const doubleNested = Some(Some(Some(1)));
     expect(doubleNested.flatten().unwrap().isSome()).toBe(true);
+  });
+
+  it("okOr", () => {
+    const some = Some(1);
+    const none: Option<number> = None;
+
+    expect(some.okOr("error").isOk()).toBe(true);
+    expect(some.okOr("error").unwrap()).toEqual(1);
+    expect(none.okOr("error").isErr()).toBe(true);
+    expect(none.okOr("error").unwrapErr()).toEqual("error");
+  });
+
+  it("okOrElse", () => {
+    const some = Some(1);
+    const none: Option<number> = None;
+
+    expect(some.okOrElse(() => "error").isOk()).toBe(true);
+    expect(some.okOrElse(() => "error").unwrap()).toEqual(1);
+    expect(none.okOrElse(() => "error").isErr()).toBe(true);
+    expect(none.okOrElse(() => "error").unwrapErr()).toEqual("error");
   });
 
   it("match", () => {
