@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "test": "vitest",
-    "build": "tsc"
+    "prepublish": "pnpm build",
+    "build": "rm -r dist && tsc"
   },
   "keywords": [],
   "author": "",
