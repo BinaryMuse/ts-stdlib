@@ -30,8 +30,8 @@ interface OptionMethods<T> {
   strictEquals: (other: Option<T>) => boolean;
 }
 
-export const SomeMarker = Symbol("Some");
-export const NoneMarker = Symbol("None");
+const SomeMarker = Symbol("Some");
+const NoneMarker = Symbol("None");
 
 type None<T> = {
   readonly _type: typeof NoneMarker;

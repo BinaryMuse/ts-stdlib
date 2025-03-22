@@ -1,4 +1,4 @@
-import { None, NoneMarker, Option, Some, SomeMarker } from "./option";
+import { None, Option, Some } from "./option";
 
 interface ResultMethods<T, E> {
   isOk: () => boolean;
