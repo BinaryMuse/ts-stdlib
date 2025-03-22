@@ -9,7 +9,6 @@
   ],
   "scripts": {
     "test": "vitest",
-    "publish": "pnpm publish --access public",
     "prepublish": "pnpm build",
     "build": "rm -r dist && tsc"
   },
