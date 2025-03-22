@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Result, Ok, Err } from "../src/";
+import { Result, Ok, Err, Some } from "../src/";
 
 describe("Result", () => {
   it("isOk and isErr", () => {
@@ -184,5 +184,46 @@ describe("Result", () => {
     expect(ok.err().isNone()).toEqual(true);
     expect(err.err().unwrap()).toEqual("error");
     expect(err.ok().isNone()).toEqual(true);
+  });
+
+  it("equals", () => {
+    const ok: Result<number, string> = Ok(1);
+    const err: Result<number, string> = Err("error");
+
+    expect(ok.equals(Ok(1))).toEqual(true);
+    expect(ok.equals(Err("error"))).toEqual(false);
+    expect(err.equals(Ok(1))).toEqual(false);
+    expect(err.equals(Err("error"))).toEqual(true);
+
+    const ok1 = Ok(Some(1));
+    const ok2 = Ok(Some(1));
+
+    expect(ok1.equals(ok2)).toEqual(true);
+
+    const doubleNested1 = Ok(Some(Ok(1)));
+    const doubleNested2 = Ok(Some(Ok(1)));
+
+    expect(doubleNested1.equals(doubleNested2)).toEqual(true);
+  });
+
+  it("strictEquals", () => {
+    const obj = {};
+    const ok: Result<typeof obj, string> = Ok(obj);
+    const err: Result<typeof obj, string> = Err("error");
+
+    expect(ok.strictEquals(Ok(obj))).toEqual(true);
+    expect(ok.strictEquals(Err("error"))).toEqual(false);
+    expect(err.strictEquals(Ok(obj))).toEqual(false);
+    expect(err.strictEquals(Err("error"))).toEqual(true);
+
+    const ok1 = Ok(Some(obj));
+    const ok2 = Ok(Some(obj));
+
+    expect(ok1.strictEquals(ok2)).toEqual(true);
+
+    const doubleNested1 = Ok(Some(Ok(obj)));
+    const doubleNested2 = Ok(Some(Ok(obj)));
+
+    expect(doubleNested1.strictEquals(doubleNested2)).toEqual(true);
   });
 });

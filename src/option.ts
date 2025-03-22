@@ -1,4 +1,4 @@
-import { Err, Ok, Result } from "./result";
+import { Err, ErrMarker, Ok, OkMarker, Result } from "./result";
 
 interface OptionMethods<T> {
   isSome: () => boolean;
@@ -30,8 +30,8 @@ interface OptionMethods<T> {
   strictEquals: (other: Option<T>) => boolean;
 }
 
-const SomeMarker = Symbol("Some");
-const NoneMarker = Symbol("None");
+export const SomeMarker = Symbol("Some");
+export const NoneMarker = Symbol("None");
 
 type None<T> = {
   readonly _type: typeof NoneMarker;
@@ -192,6 +192,14 @@ const SomePrototype: OptionMethods<any> = {
     ) {
       return (this.value as Some<T>).equals(wrapped as Some<T>);
     }
+    if (
+      (wrapped as any)._type === OkMarker ||
+      (wrapped as any)._type === ErrMarker
+    ) {
+      return (this.value as Result<any, any>).equals(
+        wrapped as Result<any, any>
+      );
+    }
     return this.value == wrapped;
   },
   strictEquals<T>(this: Some<T>, other: Option<T>) {
@@ -202,6 +210,14 @@ const SomePrototype: OptionMethods<any> = {
       (this.value as any)._type === SomeMarker
     ) {
       return (this.value as Some<T>).strictEquals(wrapped as Some<T>);
+    }
+    if (
+      (wrapped as any)._type === OkMarker ||
+      (wrapped as any)._type === ErrMarker
+    ) {
+      return (this.value as Result<any, any>).strictEquals(
+        wrapped as Result<any, any>
+      );
     }
     return this.value === wrapped;
   },

@@ -1,4 +1,4 @@
-import { None, Option, Some } from "./option";
+import { None, NoneMarker, Option, Some, SomeMarker } from "./option";
 
 interface ResultMethods<T, E> {
   isOk: () => boolean;
@@ -27,10 +27,13 @@ interface ResultMethods<T, E> {
 
   ok: () => Option<T>;
   err: () => Option<E>;
+
+  equals: (other: Result<T, E>) => boolean;
+  strictEquals: (other: Result<T, E>) => boolean;
 }
 
-const OkMarker = Symbol("Ok");
-const ErrMarker = Symbol("Err");
+export const OkMarker = Symbol("Ok");
+export const ErrMarker = Symbol("Err");
 
 type Ok<T, E> = {
   readonly _type: typeof OkMarker;
@@ -125,6 +128,40 @@ const OkPrototype: ResultMethods<any, any> = {
   err<T, E>(this: Ok<T, E>) {
     return None;
   },
+  equals<T, E>(this: Ok<T, E>, other: Result<T, E>) {
+    if (other.isErr()) return false;
+    const wrapped = (other as Ok<T, E>).value;
+    if (
+      (wrapped as any)._type === OkMarker &&
+      (this.value as any)._type === OkMarker
+    ) {
+      return (this.value as Ok<T, E>).equals(wrapped as Ok<T, E>);
+    }
+    if (
+      (wrapped as any)._type === SomeMarker ||
+      (wrapped as any)._type === NoneMarker
+    ) {
+      return (this.value as Option<any>).equals(wrapped as Option<any>);
+    }
+    return this.value == wrapped;
+  },
+  strictEquals<T, E>(this: Ok<T, E>, other: Result<T, E>) {
+    if (other.isErr()) return false;
+    const wrapped = (other as Ok<T, E>).value;
+    if (
+      (wrapped as any)._type === OkMarker &&
+      (this.value as any)._type === OkMarker
+    ) {
+      return (this.value as Ok<T, E>).strictEquals(wrapped as Ok<T, E>);
+    }
+    if (
+      (wrapped as any)._type === SomeMarker ||
+      (wrapped as any)._type === NoneMarker
+    ) {
+      return (this.value as Option<any>).strictEquals(wrapped as Option<any>);
+    }
+    return this.value === wrapped;
+  },
 };
 
 const ErrPrototype: ResultMethods<any, any> = {
@@ -201,6 +238,40 @@ const ErrPrototype: ResultMethods<any, any> = {
   },
   err<T, E>(this: Err<T, E>) {
     return Some(this.error);
+  },
+  equals<T, E>(this: Err<T, E>, other: Result<T, E>) {
+    if (other.isOk()) return false;
+    const wrapped = (other as Err<T, E>).error;
+    if (
+      (wrapped as any)._type === ErrMarker &&
+      (this.error as any)._type === ErrMarker
+    ) {
+      return (this.error as Err<T, E>).equals(wrapped as Err<T, E>);
+    }
+    if (
+      (wrapped as any)._type === SomeMarker ||
+      (wrapped as any)._type === NoneMarker
+    ) {
+      return (this.error as Option<any>).equals(wrapped as Option<any>);
+    }
+    return this.error == wrapped;
+  },
+  strictEquals<T, E>(this: Err<T, E>, other: Result<T, E>) {
+    if (other.isOk()) return false;
+    const wrapped = (other as Err<T, E>).error;
+    if (
+      (wrapped as any)._type === ErrMarker &&
+      (this.error as any)._type === ErrMarker
+    ) {
+      return (this.error as Err<T, E>).strictEquals(wrapped as Err<T, E>);
+    }
+    if (
+      (wrapped as any)._type === SomeMarker ||
+      (wrapped as any)._type === NoneMarker
+    ) {
+      return (this.error as Option<any>).strictEquals(wrapped as Option<any>);
+    }
+    return this.error === wrapped;
   },
 };
 

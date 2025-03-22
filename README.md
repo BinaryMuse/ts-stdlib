@@ -83,11 +83,11 @@ An `Option<T>` has two variants:
 
 * `Option<T>.equals(other: Option<T>): boolean`
 
-  Returns true if both options are `Some` and their inner values are equal using the JavaScript `==` operator, or if both options are `None`. As a special case, if both options are `Some` and their inner values are also `Some`, their inner values are compared with `equals()`.
+  Returns true if both options are `Some` and their inner values are equal using the JavaScript `==` operator, or if both options are `None`. As a special case, if both options are `Some` and their inner values are also `Some` or another library type (like `Result`), their inner values are compared with `equals()`.
 
 * `Option<T>.strictEquals(other: Option<T>): boolean`
 
-  Returns true if both options are `Some` and their inner values are equal using the JavaScript `===` operator, or if both options are `None`. As a special case, if both options are `Some` and their inner values are also `Some`, their inner values are compared with `strictEquals()`.
+  Returns true if both options are `Some` and their inner values are equal using the JavaScript `===` operator, or if both options are `None`. As a special case, if both options are `Some` and their inner values are also `Some` or another library type (like `Result`), their inner values are compared with `strictEquals()`.
 
 ### Transforming options
 
@@ -191,6 +191,14 @@ const result2: Result<ValueType, ErrorType> = Err(error);
 * `Result<T, E>.expectErr(msg: string): E`
 
   Returns the error value if the result is `Err`, otherwise throws an exception with the provided message
+
+* `Result<T, E>.equals(other: Result<T, E>): boolean`
+
+  Returns true if both results are `Ok` and their inner values are equal using the JavaScript `==` operator, or if both results are `Err` and their error values are equal using the JavaScript `==` operator. As a special case, if both results contain inner values that are also `Result` or `Option` types, their inner values are compared with `equals()`.
+
+* `Result<T, E>.strictEquals(other: Result<T, E>): boolean`
+
+  Returns true if both results are `Ok` and their inner values are equal using the JavaScript `===` operator, or if both results are `Err` and their error values are equal using the JavaScript `===` operator. As a special case, if both results contain inner values that are also `Result` or `Option` types, their inner values are compared with `strictEquals()`.
 
 ### Transforming results
 

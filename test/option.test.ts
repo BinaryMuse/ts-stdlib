@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Option, Some, None } from "../src/";
+import { Option, Some, None, Ok } from "../src/";
 
 describe("Option", () => {
   it("isSome and isNone", () => {
@@ -223,6 +223,16 @@ describe("Option", () => {
     const nested2 = Some(Some(1));
 
     expect(nested1.equals(nested2)).toEqual(true);
+
+    const ok1 = Some(Ok(1));
+    const ok2 = Some(Ok(1));
+
+    expect(ok1.equals(ok2)).toEqual(true);
+
+    const doubleNested1 = Some(Ok(Some(1)));
+    const doubleNested2 = Some(Ok(Some(1)));
+
+    expect(doubleNested1.strictEquals(doubleNested2)).toEqual(true);
   });
 
   it("strictEquals", () => {
@@ -237,5 +247,15 @@ describe("Option", () => {
     const nested2 = Some(Some(obj));
 
     expect(nested1.strictEquals(nested2)).toEqual(true);
+
+    const ok1 = Some(Ok(obj));
+    const ok2 = Some(Ok(obj));
+
+    expect(ok1.strictEquals(ok2)).toEqual(true);
+
+    const doubleNested1 = Some(Ok(Some(obj)));
+    const doubleNested2 = Some(Ok(Some(obj)));
+
+    expect(doubleNested1.strictEquals(doubleNested2)).toEqual(true);
   });
 });
