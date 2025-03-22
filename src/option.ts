@@ -115,10 +115,34 @@ export function Some<T>(value: T): Option<T> {
     },
 
     equals(other: Option<T>): boolean {
-      return other.isSome() && other.unwrap() == this.value;
+      if (other.isNone()) {
+        return false;
+      }
+
+      const wrapped = other.unwrap();
+      if (
+        (wrapped as any)._type === SomeMarker &&
+        (this.value as any)._type === SomeMarker
+      ) {
+        return (this.value as Some<T>).equals(wrapped as Some<T>);
+      } else {
+        return this.value == wrapped;
+      }
     },
     strictEquals(other: Option<T>): boolean {
-      return other.isSome() && other.unwrap() === this.value;
+      if (other.isNone()) {
+        return false;
+      }
+
+      const wrapped = other.unwrap();
+      if (
+        (wrapped as any)._type === SomeMarker &&
+        (this.value as any)._type === SomeMarker
+      ) {
+        return (this.value as Some<T>).strictEquals(wrapped as Some<T>);
+      } else {
+        return this.value === wrapped;
+      }
     },
   } as Option<T>;
 }

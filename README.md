@@ -67,11 +67,11 @@ An `Option<T>` has two variants:
 
 * `Option<T>.equals(other: Option<T>): boolean`
 
-  Returns true if both options are `Some` and their inner values are equal using the JavaScript `==` operator, or if both options are `None`
+  Returns true if both options are `Some` and their inner values are equal using the JavaScript `==` operator, or if both options are `None`. As a special case, if both options are `Some` and their inner values are also `Some`, their inner values are compared with `equals()`.
 
 * `Option<T>.strictEquals(other: Option<T>): boolean`
 
-  Returns true if both options are `Some` and their inner values are equal using the JavaScript `===` operator, or if both options are `None`
+  Returns true if both options are `Some` and their inner values are equal using the JavaScript `===` operator, or if both options are `None`. As a special case, if both options are `Some` and their inner values are also `Some`, their inner values are compared with `strictEquals()`.
 
 ### Transforming options
 

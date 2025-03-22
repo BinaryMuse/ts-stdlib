@@ -187,6 +187,11 @@ describe("Option", () => {
 
     expect(some.equals(Some(1))).toEqual(true);
     expect(none.equals(Some(1))).toEqual(false);
+
+    const nested1 = Some(Some(1));
+    const nested2 = Some(Some(1));
+
+    expect(nested1.equals(nested2)).toEqual(true);
   });
 
   it("strictEquals", () => {
@@ -196,5 +201,10 @@ describe("Option", () => {
 
     expect(some.strictEquals(Some(obj))).toEqual(true);
     expect(none.strictEquals(Some(obj))).toEqual(false);
+
+    const nested1 = Some(Some(obj));
+    const nested2 = Some(Some(obj));
+
+    expect(nested1.strictEquals(nested2)).toEqual(true);
   });
 });
