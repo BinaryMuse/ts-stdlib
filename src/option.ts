@@ -44,183 +44,317 @@ export function Some<T>(value: T): Option<T> {
     return None;
   }
 
-  return {
+  const ret = {
     _type: SomeMarker,
     value,
-    isSome(): boolean {
-      return true;
-    },
-    isSomeAnd(fn: (value: T) => boolean): boolean {
-      return fn(this.value);
-    },
-    isNone(): boolean {
-      return false;
-    },
-    isNoneOr(fn: (value: T) => boolean): boolean {
-      return fn(this.value);
-    },
-    unwrap(): T {
-      return this.value;
-    },
-    unwrapOr(_defaultValue: T): T {
-      return this.value;
-    },
-    unwrapOrElse(_fn: () => T): T {
-      return this.value;
-    },
-    expect(_msg: string): T {
-      return this.value;
-    },
+  };
 
-    map<U>(fn: (value: T) => U): Option<U> {
-      return Some(fn(this.value));
+  Object.defineProperties(ret, {
+    isSome: {
+      enumerable: false,
+      value: function (): boolean {
+        return true;
+      },
     },
-    mapOr<U>(_defaultValue: U, fn: (value: T) => U): Option<U> {
-      return Some(fn(this.value));
+    isSomeAnd: {
+      enumerable: false,
+      value: function (fn: (value: T) => boolean): boolean {
+        return fn(this.value);
+      },
     },
-    mapOrElse<U>(_defaultFn: () => U, mapFn: (value: T) => U): Option<U> {
-      return Some(mapFn(this.value));
+    isNone: {
+      enumerable: false,
+      value: function (): boolean {
+        return false;
+      },
     },
-    and<U>(other: Option<U>): Option<U> {
-      return other;
+    isNoneOr: {
+      enumerable: false,
+      value: function (fn: (value: T) => boolean): boolean {
+        return fn(this.value);
+      },
     },
-    andThen<U>(fn: (value: T) => Option<U>): Option<U> {
-      return fn(this.value);
+    unwrap: {
+      enumerable: false,
+      value: function (): T {
+        return this.value;
+      },
     },
-    or(_other: Option<T>): Option<T> {
-      return this;
+    unwrapOr: {
+      enumerable: false,
+      value: function (_defaultValue: T): T {
+        return this.value;
+      },
     },
-    xor(other: Option<T>): Option<T> {
-      if (other.isSome()) {
-        return None;
-      } else {
+    unwrapOrElse: {
+      enumerable: false,
+      value: function (_fn: () => T): T {
+        return this.value;
+      },
+    },
+    expect: {
+      enumerable: false,
+      value: function (_msg: string): T {
+        return this.value;
+      },
+    },
+    map: {
+      enumerable: false,
+      value: function <U>(fn: (value: T) => U): Option<U> {
+        return Some(fn(this.value));
+      },
+    },
+    mapOr: {
+      enumerable: false,
+      value: function <U>(_defaultValue: U, fn: (value: T) => U): Option<U> {
+        return Some(fn(this.value));
+      },
+    },
+    mapOrElse: {
+      enumerable: false,
+      value: function <U>(
+        _defaultFn: () => U,
+        mapFn: (value: T) => U
+      ): Option<U> {
+        return Some(mapFn(this.value));
+      },
+    },
+    and: {
+      enumerable: false,
+      value: function <U>(other: Option<U>): Option<U> {
+        return other;
+      },
+    },
+    andThen: {
+      enumerable: false,
+      value: function <U>(fn: (value: T) => Option<U>): Option<U> {
+        return fn(this.value);
+      },
+    },
+    or: {
+      enumerable: false,
+      value: function (_other: Option<T>): Option<T> {
         return this;
-      }
+      },
     },
-    orElse(_fn: () => Option<T>): Option<T> {
-      return this;
+    xor: {
+      enumerable: false,
+      value: function (other: Option<T>): Option<T> {
+        if (other.isSome()) {
+          return None;
+        } else {
+          return this;
+        }
+      },
     },
-    filter(fn: (value: T) => boolean): Option<T> {
-      return fn(this.value) ? this : None;
+    orElse: {
+      enumerable: false,
+      value: function (_fn: () => Option<T>): Option<T> {
+        return this;
+      },
     },
-    flatten(): Option<T> {
-      if (this.isSome() && (this.value as Some<T>)._type === SomeMarker) {
-        return this.value as Some<T>;
-      }
-      return this;
+    filter: {
+      enumerable: false,
+      value: function (fn: (value: T) => boolean): Option<T> {
+        return fn(this.value) ? this : None;
+      },
     },
+    flatten: {
+      enumerable: false,
+      value: function (): Option<T> {
+        if (this.isSome() && (this.value as Some<T>)._type === SomeMarker) {
+          return this.value as Some<T>;
+        }
+        return this;
+      },
+    },
+    match: {
+      enumerable: false,
+      value: function <U>(cases: { some: (value: T) => U; none: () => U }): U {
+        return cases.some(this.value);
+      },
+    },
+    equals: {
+      enumerable: false,
+      value: function (other: Option<T>): boolean {
+        if (other.isNone()) {
+          return false;
+        }
+        const wrapped = other.unwrap();
+        if (
+          (wrapped as any)._type === SomeMarker &&
+          (this.value as any)._type === SomeMarker
+        ) {
+          return (this.value as Some<T>).equals(wrapped as Some<T>);
+        } else {
+          return this.value == wrapped;
+        }
+      },
+    },
+    strictEquals: {
+      enumerable: false,
+      value: function (other: Option<T>): boolean {
+        if (other.isNone()) {
+          return false;
+        }
+        const wrapped = other.unwrap();
+        if (
+          (wrapped as any)._type === SomeMarker &&
+          (this.value as any)._type === SomeMarker
+        ) {
+          return (this.value as Some<T>).strictEquals(wrapped as Some<T>);
+        } else {
+          return this.value === wrapped;
+        }
+      },
+    },
+  });
 
-    match(cases) {
-      return cases.some(this.value);
-    },
-
-    equals(other: Option<T>): boolean {
-      if (other.isNone()) {
-        return false;
-      }
-
-      const wrapped = other.unwrap();
-      if (
-        (wrapped as any)._type === SomeMarker &&
-        (this.value as any)._type === SomeMarker
-      ) {
-        return (this.value as Some<T>).equals(wrapped as Some<T>);
-      } else {
-        return this.value == wrapped;
-      }
-    },
-    strictEquals(other: Option<T>): boolean {
-      if (other.isNone()) {
-        return false;
-      }
-
-      const wrapped = other.unwrap();
-      if (
-        (wrapped as any)._type === SomeMarker &&
-        (this.value as any)._type === SomeMarker
-      ) {
-        return (this.value as Some<T>).strictEquals(wrapped as Some<T>);
-      } else {
-        return this.value === wrapped;
-      }
-    },
-  } as Option<T>;
+  return ret as Option<T>;
 }
 
 function NoneFn<T>(): Option<T> {
-  return {
+  const ret = {
     _type: NoneMarker,
-    isSome() {
-      return false;
-    },
-    isSomeAnd(_fn: (value: T) => boolean): boolean {
-      return false;
-    },
-    isNone() {
-      return true;
-    },
-    isNoneOr(_fn: (value: T) => boolean): boolean {
-      return true;
-    },
-    unwrap() {
-      throw new Error("Tried to unwrap None");
-    },
-    unwrapOr<U extends T>(defaultValue: U): U {
-      return defaultValue;
-    },
-    unwrapOrElse<U extends T>(fn: () => U): U {
-      return fn();
-    },
-    expect(msg: string): T {
-      throw new Error(msg);
-    },
-
-    map<U>(_fn: (value: T) => U): Option<U> {
-      return None;
-    },
-    mapOr<U>(defaultValue: U, _fn: (value: T) => U): Option<U> {
-      return Some(defaultValue);
-    },
-    mapOrElse<U>(defaultFn: () => U, _mapFn: (value: T) => U): Option<U> {
-      return Some(defaultFn());
-    },
-    and<U>(_other: Option<U>): Option<U> {
-      return None;
-    },
-    andThen<U>(_fn: (value: T) => Option<U>): Option<U> {
-      return None;
-    },
-    or<U extends T>(_other: Option<U>): Option<U> {
-      return _other;
-    },
-    xor(other: Option<T>): Option<T> {
-      if (other.isSome()) {
-        return other;
-      } else {
-        return None;
-      }
-    },
-    orElse(fn: () => Option<T>): Option<T> {
-      return fn();
-    },
-    filter(_fn: (value: T) => boolean): Option<T> {
-      return None;
-    },
-    flatten(): Option<T> {
-      return None;
-    },
-
-    match(cases) {
-      return cases.none();
-    },
-
-    equals(_other: Option<T>): boolean {
-      return _other === None;
-    },
-    strictEquals(_other: Option<T>): boolean {
-      return _other === None;
-    },
   };
+
+  Object.defineProperties(ret, {
+    isSome: {
+      enumerable: false,
+      value: function (): boolean {
+        return false;
+      },
+    },
+    isSomeAnd: {
+      enumerable: false,
+      value: function (_fn: (value: T) => boolean): boolean {
+        return false;
+      },
+    },
+    isNone: {
+      enumerable: false,
+      value: function (): boolean {
+        return true;
+      },
+    },
+    isNoneOr: {
+      enumerable: false,
+      value: function (_fn: (value: T) => boolean): boolean {
+        return true;
+      },
+    },
+    unwrap: {
+      enumerable: false,
+      value: function (): T {
+        throw new Error("Tried to unwrap None");
+      },
+    },
+    unwrapOr: {
+      enumerable: false,
+      value: function <U extends T>(defaultValue: U): U {
+        return defaultValue;
+      },
+    },
+    unwrapOrElse: {
+      enumerable: false,
+      value: function <U extends T>(fn: () => U): U {
+        return fn();
+      },
+    },
+    expect: {
+      enumerable: false,
+      value: function (msg: string): T {
+        throw new Error(msg);
+      },
+    },
+    map: {
+      enumerable: false,
+      value: function <U>(_fn: (value: T) => U): Option<U> {
+        return None;
+      },
+    },
+    mapOr: {
+      enumerable: false,
+      value: function <U>(defaultValue: U, _fn: (value: T) => U): Option<U> {
+        return Some(defaultValue);
+      },
+    },
+    mapOrElse: {
+      enumerable: false,
+      value: function <U>(
+        defaultFn: () => U,
+        _mapFn: (value: T) => U
+      ): Option<U> {
+        return Some(defaultFn());
+      },
+    },
+    and: {
+      enumerable: false,
+      value: function <U>(_other: Option<U>): Option<U> {
+        return None;
+      },
+    },
+    andThen: {
+      enumerable: false,
+      value: function <U>(_fn: (value: T) => Option<U>): Option<U> {
+        return None;
+      },
+    },
+    or: {
+      enumerable: false,
+      value: function <U extends T>(_other: Option<U>): Option<U> {
+        return _other;
+      },
+    },
+    xor: {
+      enumerable: false,
+      value: function (other: Option<T>): Option<T> {
+        if (other.isSome()) {
+          return other;
+        } else {
+          return None;
+        }
+      },
+    },
+    orElse: {
+      enumerable: false,
+      value: function (fn: () => Option<T>): Option<T> {
+        return fn();
+      },
+    },
+    filter: {
+      enumerable: false,
+      value: function (_fn: (value: T) => boolean): Option<T> {
+        return None;
+      },
+    },
+    flatten: {
+      enumerable: false,
+      value: function (): Option<T> {
+        return None;
+      },
+    },
+    match: {
+      enumerable: false,
+      value: function <U>(cases: { some: (value: T) => U; none: () => U }): U {
+        return cases.none();
+      },
+    },
+    equals: {
+      enumerable: false,
+      value: function (_other: Option<T>): boolean {
+        return _other === None;
+      },
+    },
+    strictEquals: {
+      enumerable: false,
+      value: function (_other: Option<T>): boolean {
+        return _other === None;
+      },
+    },
+  });
+
+  return ret as Option<T>;
 }
 
 /**
