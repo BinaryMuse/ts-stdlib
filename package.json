@@ -4,7 +4,7 @@
   "description": "A collection of useful utility types for TypeScript, including Option, Result, and more",
   "repository": {
     "type": "git",
-    "url": "https://github.com/binarymuse/ts-stdlib.git"
+    "url": "git+https://github.com/binarymuse/ts-stdlib.git"
   },
   "homepage": "https://github.com/binarymuse/ts-stdlib",
   "bugs": {
@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "test": "vitest",
-    "prepublish": "pnpm build",
+    "prepublishOnly": "pnpm build",
     "build": "rm -r dist && tsc"
   },
   "keywords": [
