@@ -352,6 +352,10 @@ A `Deque<T>` is a double-ended queue that allows efficient insertion and removal
 
   Creates a new empty deque
 
+* `Deque.from<T>(iter: Iterable<T>): Deque<T>`
+
+  Creates a deque from the items in an `Iterable`
+
 * `Deque<T>.pushFront(item: T): void`
 
   Adds an item to the front of the deque

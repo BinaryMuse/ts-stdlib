@@ -11,6 +11,14 @@ export class Deque<T> {
   private front: Option<DequeNode<T>>;
   private back: Option<DequeNode<T>>;
 
+  static from<T>(iterable: Iterable<T>): Deque<T> {
+    const deque = new Deque<T>();
+    for (const item of iterable) {
+      deque.pushBack(item);
+    }
+    return deque;
+  }
+
   constructor() {
     const none = None;
     this.front = none;

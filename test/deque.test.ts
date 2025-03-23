@@ -2,6 +2,26 @@ import { test, expect, describe } from "vitest";
 import { Deque } from "../src";
 
 describe("Deque", () => {
+  test("from", () => {
+    const deque1 = Deque.from([1, 2, 3]);
+    expect(deque1.peekFront().unwrap()).toEqual(1);
+    expect(deque1.peekBack().unwrap()).toEqual(3);
+
+    const deque2 = Deque.from(new Set([1, 2, 3]));
+    expect(deque2.peekFront().unwrap()).toEqual(1);
+    expect(deque2.peekBack().unwrap()).toEqual(3);
+
+    const deque3 = Deque.from(
+      new Map([
+        ["a", 1],
+        ["b", 2],
+        ["c", 3],
+      ])
+    );
+    expect(deque3.peekFront().unwrap()).toEqual(["a", 1]);
+    expect(deque3.peekBack().unwrap()).toEqual(["c", 3]);
+  });
+
   test("pushFront", () => {
     const deque = new Deque<number>();
     deque.pushFront(1);
