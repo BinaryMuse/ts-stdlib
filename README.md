@@ -4,9 +4,15 @@
 
 The library includes:
 
+Wrapper Types:
+
 * [`Option<T>`](#optiont) - a type that represents a value (`Some<T>`) or the absence of one (`None`)
 * [`Result<T, E>`](#resultt-e) - a type that represents a successful result (`Ok<T>`) or an error (`Err<E>`)
 * [`Rc<T>`](#rct) - a reference counted resource
+
+Container Types:
+
+* [`Deque<T>`](#dequet) - a double-ended queue, implemented with a doubly-linked list
 
 ## Installation
 
@@ -45,7 +51,7 @@ An `Option<T>` has two variants:
 * `Option<T>.isSomeAnd(fn: (value: T) => boolean): boolean`
 
   Returns `true` if the option is `Some` and calling `fn` with the inner value returns `true`, `false` otherwise
- 
+
 * `Option<T>.isNone(): boolean`
 
   Returns `true` if the option is `None`, `false` otherwise
@@ -327,3 +333,58 @@ Since an `Rc` exposes all the methods and properties of its wrapped resource, al
   * `weakCount` - the number of weak references to the resource left un-disposed
   * `disposed` - `true` if this specific `Rc` or `Weak` instance has been disposed, `false` otherwise
   * `innerDisposed` - `true` if the wrapped resource has been disposed, `false` otherwise
+
+## `Deque<T>`
+
+```typescript
+import { Deque } from "@binarymuse/ts-stdlib"
+```
+
+A `Deque<T>` is a double-ended queue that allows efficient insertion and removal at both ends. It's implemented as a doubly-linked list, making it ideal for situations where you need to:
+
+* Add or remove elements from either end in O(1) time
+* Maintain a queue that can grow in either direction
+* Implement a work queue that can have items prioritized (added to front) or queued normally (added to back)
+
+### API
+
+* `new Deque<T>()`
+
+  Creates a new empty deque
+
+* `Deque<T>.pushFront(item: T): void`
+
+  Adds an item to the front of the deque
+
+* `Deque<T>.pushBack(item: T): void`
+
+  Adds an item to the back of the deque
+
+* `Deque<T>.popFront(): Option<T>`
+
+  Removes and returns the item at the front of the deque, or `None` if the deque is empty
+
+* `Deque<T>.popBack(): Option<T>`
+
+  Removes and returns the item at the back of the deque, or `None` if the deque is empty
+
+* `Deque<T>.peekFront(): Option<T>`
+
+  Returns the item at the front of the deque without removing it, or `None` if the deque is empty
+
+* `Deque<T>.peekBack(): Option<T>`
+
+  Returns the item at the back of the deque without removing it, or `None` if the deque is empty
+
+The deque also implements the iterator protocol, allowing you to iterate through all items from front to back:
+
+```typescript
+const deque = new Deque<number>();
+deque.pushBack(1);
+deque.pushBack(2);
+deque.pushFront(0);
+
+for (const item of deque) {
+  console.log(item); // Prints: 0, 1, 2
+}
+```
