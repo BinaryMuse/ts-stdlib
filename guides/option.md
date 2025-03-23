@@ -2,8 +2,6 @@
 
 An `Option<T>` is a value that represents the existance (or lack thereof) of another value. You can think of it a bit like `T | null` or `T | undefined`. While TypeScript can enforce checking to ensure you don't use a `null` or `undefined` value, `Option` provides some additional functionality that can make it a nice alternative.
 
-## Overview
-
 To create an `Option` wrapping some value of type `T` (written as `Option<T>`), use the `Some` function. For example: `const opt = Some(value)`. If you want to create an `Option` representing the lack of a value, use `None`. For example: `const missing = None`.
 
 To get to the wrapped value, call `unwrap()` on the `Option`. If the option is `None`, then `unwrap()` will throw an error; thus, it's important to check to see if an option is `Some` or `None` before accessing the value, or use a method that provides a default value in the case of `None`, like `unwrapOr(defaultValue)`.

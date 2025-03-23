@@ -2,8 +2,6 @@
 
 A `Result<T, E>` is a value that represents either a successful computation (`Ok<T>`) or an error (`Err<E>`). It's similar to try/catch blocks, but provides a more functional approach to handling errors and composing operations that might fail.
 
-## Overview
-
 To create a `Result` representing a successful computation of type `T`, use the `Ok` function. For example: `const result = Ok(value)`. If you want to create a `Result` representing an error of type `E`, use `Err`. For example: `const error = Err(new Error("Something went wrong"))`.
 
 To get the successful value, call `unwrap()` on the `Result`. If the result is `Err`, then `unwrap()` will throw the error; thus, it's important to check if a result is `Ok` or `Err` before accessing the value, or use a method that provides a default value in case of `Err`, like `unwrapOr(defaultValue)`.
