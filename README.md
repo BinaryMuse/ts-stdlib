@@ -6,7 +6,7 @@ The library includes:
 
 * [`Option<T>`](#optiont) - a type that represents a value (`Some<T>`) or the absence of one (`None`)
 * [`Result<T, E>`](#resultt-e) - a type that represents a successful result (`Ok<T>`) or an error (`Err<E>`)
-* `Rc<T>` - a reference counted resource
+* [`Rc<T>`](#rct) - a reference counted resource
 
 ## Installation
 
@@ -24,7 +24,7 @@ yarn add @binarymuse/ts-stdlib
 import { Option, Some, None } from "@binarymuse/ts-stdlib"
 ```
 
-For a longer guide on using `Option<T>`, [see docs/option.md](docs/option.md).
+For a longer guide on using `Option<T>`, [see guides/option.md](guides/option.md).
 
 An `Option<T>` has two variants:
 
@@ -133,7 +133,7 @@ An `Option<T>` has two variants:
 import { Result, Ok, Err } from "@binarymuse/ts-stdlib"
 ```
 
-For a longer guide on using `Result<T, E>`, [see docs/result.md](docs/result.md).
+For a longer guide on using `Result<T, E>`, [see guides/result.md](guides/result.md).
 
 A `Result<T, E>` has two variants:
 
@@ -259,3 +259,71 @@ const result2: Result<ValueType, ErrorType> = Err(error);
 * `Result<T, E>.err(): Option<E>`
 
   Converts the `Result<T, E>` into an `Option<E>`, mapping `Ok(_)` to `None` and `Err(e)` to `Some(e)`
+
+## `Rc<T>`
+
+```typescript
+import { Rc, Weak } from "@binarymuse/ts-stdlib"
+```
+
+For a longer guide on using `Rc<T>`, [see guides/rc.md](guides/rc.md).
+
+An `Rc<T>` is a reference-counted object. Since JavaScript uses garbage collection and doesn't have destructors, this type isn't as useful as it is in languages like Rust. However, there are situations where they can be useful.
+
+### Creating an `Rc`
+
+To create an `Rc<T>`, use the `Rc(resource: T, cleanup: (res: T) => void)` function. This will return an `Rc<T>`, which has access to all the same methods and properties as the original resource. Internally, this is managed using Proxies, so your JavaScript environment must support them in order to use `Rc`.
+
+Since an `Rc` in JavaScript is only useful in situations where the underlying resource has some cleanup method that needs to be called before it is garbage collected, the second argument to `Rc()` is a function that takes the wrapped value and does any appropriate cleanup.
+
+To create a copy of a reference, incrementing the internal counter, you can use `Rc.clone(rc)`. To clean up an `Rc`, potentially invoking the cleanup function (if it's the last reference of that particular resource), call `Rc.dispose(rc)`. **If you don't call `Rc.dispose()` for every `Rc` created, the underlying resource will never be cleaned up.**
+
+### Weak references
+
+At times, it's useful to create references to a resource that can be used to access the resource, but that won't keep the resource alive if all the other references are disposed. This is known as a "weak" reference (whereas `Rc` is a "strong" reference). Create a weak reference from a strong one by passing it to `Rc.weak(rc)` or `Rc.intoWeak(rc)`.
+
+To be useful, a weak reference must be able to be turned back into a strong reference. You can do this with `Rc.upgrade(weak)`, getting an `Option<Rc<T>>`. However, since weak references don't keep a resource from being cleaned up, it's possible that the resource is already disposed (due to all the strong references already being disposed). In this case, `Rc.upgrade(weak)` will return `None`.
+
+### API
+
+Since an `Rc` exposes all the methods and properties of its wrapped resource, all the methods are static functions on `Rc` itself.
+
+* `Rc<T extends object>(resource: T, cleanup: (res: T) => void): Rc<T>`
+
+  Creates a new strong reference-counted resource wrapping `resource`. When the last strong reference is disposed, the cleanup function is run.
+
+* `Rc.clone<T>(rc: Rc<T>): Rc<T>`
+
+  Creates a copy of the `Rc`, incrementing its internal reference count by 1. Both the original and newly-returned `Rc` must be `dispose()`d before the resource will be disposed.
+
+* `Rc.dispose<T>(rc: Rc<T> | Weak<T>)`
+
+  Disposes of an `Rc`, decrementing its internal reference count by 1, and cleaning up the underlying resource if the counter reaches 0. `Weak` references won't keep the underlying resource alive (see `Rc.weak()`), so they don't strictly need to be disposed, but they can still be passed to `Rc.dispose()`.
+
+  After an `Rc` or a `Weak` has been `dispose()`d, it can no longer be used, and trying to access any of the exposed methods or properties from the wrapped resource will throw an error. Passing the `Rc` to the `Rc.*` methods (except `inspect()`) will also throw.
+
+* `Rc.weak<T>(rc: Rc<T>): Weak<T>`
+
+  Creates a `Weak<T>`, known as a weak reference, from the original `Rc`, leaving the original intact. A weak reference won't keep the underlying resource from being disposed; that is, if all the strong references (`Rc<T>`s) are disposed, the resource will be cleaned up, even if there are still `Weak<T>` references to the resource that haven't been disposed.
+
+  A `Weak<T>` can be "upgraded" to a strong `Rc<T>` via the `Rc.upgrade()` function.
+
+* `Rc.intoWeak<T>(rc: Rc<T>): Weak<T>`
+
+  Returns a new weak reference from the strong reference, just like `weak()`, but it additionally disposes of the original, strong reference, which can no longer be used — effectively "turning" the strong reference into a weak one.
+
+  If the reference being converted into a weak reference is the last strong reference for a resource, the resource will be immediately disposed, since the newly-created weak reference doesn't keep the resource alive.
+
+* `Rc.upgrade<T>(weak: Weak<T>): Option<Rc<T>>`
+
+  Upgrading a `Weak<T>` attempts to create a new `Rc<T>` with the same underlying resource. If the resource has been cleaned up, due to all the strong references being disposed already, the function will return `None`. If the resource is still alive, it will return `Some<Rc<T>>`.
+
+* `Rc.inspect<T>(rc: Rc<T> | Weak<T>): RcInfo`
+
+  Returns an object with information about the `Rc`, useful for debugging. `RcInfo` has the following properties:
+
+  * `id` - the internal ID of the `Rc`
+  * `refCount` - the number of strong references to the resource left un-disosed
+  * `weakCount` - the number of weak references to the resource left un-disposed
+  * `disposed` - `true` if this specific `Rc` or `Weak` instance has been disposed, `false` otherwise
+  * `innerDisposed` - `true` if the wrapped resource has been disposed, `false` otherwise
