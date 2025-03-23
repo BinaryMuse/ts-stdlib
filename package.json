@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "test": "vitest",
-    "prepublishOnly": "pnpm build",
+    "prepublishOnly": "pnpm test && pnpm build",
     "build": "rm -r dist && tsc"
   },
   "keywords": [
