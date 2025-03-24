@@ -48,6 +48,8 @@ describe("Option", () => {
 
     expect(some.unwrapOr(2)).toBe(1);
     expect(none.unwrapOr(2)).toBe(2);
+
+    expect(None.unwrapOr(null)).toBe(null);
   });
 
   it("unwrapOrElse", () => {
@@ -56,6 +58,8 @@ describe("Option", () => {
 
     expect(some.unwrapOrElse(() => 3)).toBe(1);
     expect(none.unwrapOrElse(() => 3)).toBe(3);
+
+    expect(None.unwrapOrElse(() => null)).toBe(null);
   });
 
   it("expect", () => {

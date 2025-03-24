@@ -37,6 +37,8 @@ describe("Result", () => {
 
     expect(ok.unwrapOr(2)).toBe(1);
     expect(err.unwrapOr(2)).toBe(2);
+
+    expect(Err("error").unwrapOr(null)).toBe(null);
   });
 
   it("unwrapOrElse", () => {
@@ -45,6 +47,8 @@ describe("Result", () => {
 
     expect(ok.unwrapOrElse(() => 2)).toBe(1);
     expect(err.unwrapOrElse(() => 2)).toBe(2);
+
+    expect(Err("error").unwrapOrElse(() => null)).toBe(null);
   });
 
   it("unwrapErr", () => {

@@ -224,7 +224,7 @@ interface ResultMethods<T, E> {
    * @returns {T} The success value or the default value.
    * @group Unwrap Methods
    */
-  unwrapOr: (defaultValue: T) => T;
+  unwrapOr: (defaultValue: T | null) => T | null;
 
   /**
    * Returns the success value. If the result is `Err`, this will call the provided function and return its result.
@@ -243,7 +243,7 @@ interface ResultMethods<T, E> {
    * @returns {T} The success value or the result of the function.
    * @group Unwrap Methods
    */
-  unwrapOrElse: (fn: () => T) => T;
+  unwrapOrElse: (fn: () => T | null) => T | null;
 
   /**
    * Returns the error value. If the result is `Ok`, this will throw an error.
