@@ -1,0 +1,19 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "./src/option.ts",
+    "./src/result.ts",
+    "./src/deque.ts",
+    "./src/rc.ts"
+  ],
+  "out": "../ts-stdlib-site/",
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeExternals": true,
+  "exclude": ["node_modules", "dist", "build", "test"],
+  "router": "kind",
+  "plugin": ["typedoc-plugin-missing-exports"],
+  "placeInternalsInOwningModule": true,
+  "customCss": "assets/typedoc.css"
+}

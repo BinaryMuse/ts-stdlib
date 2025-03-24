@@ -1,13 +1,101 @@
+/**
+ * ```typescript
+ * import { Rc, Weak, RcInfo } from "@binarymuse/ts-stdlib";
+ * ```
+ *
+ * > *(See {@link Rc} for the `Rc` API)*
+ *
+ * ## Overview
+ *
+ * A reference-counted object provides a way to manage shared resources that need cleanup
+ * when they're no longer in use. There are two types of references:
+ *
+ * 1. Strong references (`Rc<T>`):
+ *    - Created with `Rc()` or `Rc.clone()`
+ *    - Keep the resource alive as long as at least one strong reference exists
+ *    - Must be explicitly disposed with `Rc.dispose()` when no longer needed
+ *
+ * 2. Weak references (`Weak<T>`):
+ *    - Created with `Rc.weak()` or `Rc.intoWeak()`
+ *    - Don't prevent the resource from being cleaned up
+ *    - Can be upgraded to strong references with `Rc.upgrade()` if the resource is still alive
+ *
+ * When the last strong reference to a resource is disposed, the resource's cleanup
+ * function will be called automatically. Weak references can still exist at this point,
+ * but they can no longer be upgraded to strong references.
+ *
+ * ## Example:
+ *
+ * ```typescript
+ * const resource = Rc(connection, conn => conn.close());
+ *
+ * // Creates another strong reference
+ * const ref2 = Rc.clone(resource);
+ * // Creates a weak reference
+ * const weak = Rc.weak(resource);
+ *
+ * // Resource stays alive (ref2 exists)
+ * Rc.dispose(resource);
+ * // Returns Some(Rc<T>) (resource still alive)
+ * const upgraded = Rc.upgrade(weak);
+ * // Resource is cleaned up
+ * Rc.dispose(ref2);
+ * // Returns None (resource disposed)
+ * const failed = Rc.upgrade(weak);
+ * ```
+ *
+ * The `intoWeak` function is a special case that:
+ * 1. Creates a new weak reference
+ * 2. Disposes the original strong reference
+ * 3. Returns the weak reference
+ *
+ * This is equivalent to, but more efficient than:
+ * ```typescript
+ * const weak = Rc.weak(resource);
+ * Rc.dispose(resource);
+ * return weak;
+ * ```
+ *
+ * @see {@link Rc} for the `Rc` API
+ *
+ * @module Rc
+ * @group rc
+ */
 import { None, Option, Some } from "./option";
 
 const Marker = Symbol("Rc");
 const WeakMarker = Symbol("Weak");
 
+/**
+ * Information about a reference-counted object, returned by {@link Rc.inspect | `Rc.inspect()`}.
+ *
+ * @group rc
+ */
 type RcInfo = {
+  /**
+   * The internal ID of the Rc.
+   * @group Properties
+   */
   id: number;
+  /**
+   * The number of strong references to the Rc.
+   * @group Properties
+   */
   refCount: number;
+  /**
+   * The number of weak references to the Rc.
+   * @group Properties
+   */
   weakCount: number;
+  /**
+   * Whether the Rc has been disposed.
+   * @group Properties
+   */
   disposed: boolean;
+  /**
+   * Whether the inner object has been disposed.
+   * @group Properties
+   */
   innerDisposed: boolean;
 };
 
@@ -77,7 +165,17 @@ function getNextId(): number {
 
 const map = new Map<number, RcInner<any>>();
 
+/**
+ * A strong reference to a reference-counted object.
+ * @typeParam T - The type of the inner object.
+ * @group rc
+ */
 type Rc<T> = T & {
+  /**
+   * Internal marker for Rc management.
+   * @internal
+   * @group Properties
+   */
   [Marker]: {
     id: number;
     dispose: () => void;
@@ -87,7 +185,17 @@ type Rc<T> = T & {
   };
 };
 
+/**
+ * A weak reference to a reference-counted object.
+ * @typeParam T - The type of the inner object.
+ * @group rc
+ */
 type Weak<T> = {
+  /**
+   * Internal marker for Weak management.
+   * @internal
+   * @group Properties
+   */
   [WeakMarker]: {
     id: number;
     dispose: () => void;
@@ -218,45 +326,13 @@ function createProxy<T extends object>(id: number, inner: RcInner<T>) {
 }
 
 /**
- * Creates a new reference-counted object.
- *
- * A reference-counted object is an object that can be cloned and disposed.
- * When the last reference is disposed, the underlying object will be disposed.
- * `Rc.clone` creates a new reference to the same object. `Rc.dispose` decrements
- * the reference count.
- *
- * `Rc.weak` creates a weak reference to the object. A weak reference won't prevent
- * the underlying object from being disposed if there are no other strong references
- * remaining. You can attempt to upgrade a weak reference to a strong reference using
- * `Rc.upgrade`. If the underlying object has been disposed, `Rc.upgrade` will return
- * `None`.
- *
- * `Rc.intoWeak` can be used to convert a strong reference to a weak reference.
- * This will decrement the reference count, and if there are no other strong
- * references remaining, the underlying object will be disposed immediately.
- * Note that this does not mutate the original reference, but returns a new
- * weak reference; however, the original reference will no longer be usable, nor
- * will it keep the underlying object alive.
- *
- * ## Examples
- *
- * ```typescript
- * const obj = { value: 42, disposed: false };
- * const rc = Rc(obj, () => {
- *   obj.disposed = true;
- * });
- *
- * console.log(rc.value); // 42
- * const rc2 = Rc.clone(rc);
- * Rc.dispose(rc);
- * console.log(obj.disposed); // false
- * Rc.dispose(rc2);
- * console.log(obj.disposed); // true
- * ```
+ * Creates a new strong reference to an object.
  *
  * @param object - The object to wrap.
  * @param dispose - A function to call when the last reference is disposed.
  * @returns A new reference-counted object.
+ *
+ * @group Static Methods
  */
 function Rc<T extends object>(object: T, dispose: (data: T) => void): Rc<T> {
   const id = getNextId();
@@ -265,10 +341,25 @@ function Rc<T extends object>(object: T, dispose: (data: T) => void): Rc<T> {
   return createProxy(id, inner) as Rc<T>;
 }
 
+/**
+ * Clones a reference-counted object.
+ *
+ * @param rc - The reference-counted object to clone.
+ * @returns A new reference-counted object that is a clone of the original.
+ *
+ * @group Static Methods
+ */
 Rc.clone = function <T>(rc: Rc<T>): Rc<T> {
   return (rc as any)[Marker].clone();
 };
 
+/**
+ * Disposes a reference-counted object.
+ *
+ * @param rc - The reference-counted object to dispose.
+ *
+ * @group Static Methods
+ */
 Rc.dispose = function <T>(rc: Rc<T> | Weak<T>) {
   if (Marker in rc) {
     (rc as any)[Marker].dispose();
@@ -277,18 +368,52 @@ Rc.dispose = function <T>(rc: Rc<T> | Weak<T>) {
   }
 };
 
+/**
+ * Creates a weak reference to a reference-counted object.
+ *
+ * @param rc - The reference-counted object to create a weak reference to.
+ * @returns A weak reference to the reference-counted object.
+ *
+ * @group Static Methods
+ */
 Rc.weak = function <T>(rc: Rc<T>): Weak<T> {
   return (rc as any)[Marker].weak();
 };
 
+/**
+ * Creates a weak reference to a reference-counted object, disposing of
+ * the original reference in the process.
+ *
+ * @param rc - The reference-counted object to create a weak reference to.
+ * @returns A weak reference to the reference-counted object.
+ *
+ * @group Static Methods
+ */
 Rc.intoWeak = function <T>(rc: Rc<T>): Weak<T> {
   return (rc as any)[Marker].intoWeak();
 };
 
+/**
+ * Attempts to upgrade a weak reference to a strong reference.
+ *
+ * @param weak - The weak reference to upgrade.
+ * @returns A strong reference to the reference-counted object, or `None` if
+ * the underlying object has been disposed.
+ *
+ * @group Static Methods
+ */
 Rc.upgrade = function <T>(weak: Weak<T>): Option<Rc<T>> {
   return (weak as any)[WeakMarker].upgrade();
 };
 
+/**
+ * Inspects a reference-counted object or weak reference.
+ *
+ * @param rc - The reference-counted object or weak reference to inspect.
+ * @returns Information about the reference-counted object or weak reference.
+ *
+ * @group Static Methods
+ */
 Rc.inspect = function <T>(rc: Rc<T> | Weak<T>): RcInfo {
   let api;
   if (Marker in rc) {

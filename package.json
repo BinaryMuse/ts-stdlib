@@ -18,7 +18,8 @@
   "scripts": {
     "test": "vitest",
     "prepublishOnly": "pnpm test && pnpm build",
-    "build": "rm -r dist && tsc"
+    "build": "rm -r dist && tsc",
+    "site": "typedoc --options typedoc.json --cleanOutputDir false"
   },
   "keywords": [
     "typescript",
@@ -30,6 +31,8 @@
   "author": "Michelle Tilley <michelle@michelletilley.net>",
   "license": "MIT",
   "devDependencies": {
+    "typedoc": "^0.28.1",
+    "typedoc-plugin-missing-exports": "^4.0.0",
     "typescript": "^5.8.2",
     "vitest": "^3.0.9"
   }

@@ -1,5 +1,34 @@
+/**
+ * A `Deque<T>` is a double-ended queue that allows efficient insertion and removal
+ * at both ends. It's implemented as a doubly-linked list, making it ideal for
+ * situations where you need to add or remove elements from either end in constant time.
+ *
+ * ## Examples
+ *
+ * ```ts
+ * const deque = new Deque<number>();
+ * deque.pushBack(1);
+ * deque.pushBack(2);
+ * deque.pushFront(0);
+ *
+ * deque.peekBack();  // Some(2)
+ * deque.peekFront(); // Some(0)
+ *
+ * deque.popBack();   // Some(2)
+ * deque.popFront();  // Some(0)
+ *
+ * deque.popBack();   // Some(1)
+ * deque.popFront();  // None
+ * ```
+ *
+ * @module Deque
+ * @group deque
+ */
 import { None, Some, Option } from "./option";
 
+/**
+ * @hidden
+ */
 export type DequeNode<T> = {
   id: symbol;
   value: T;
@@ -7,10 +36,22 @@ export type DequeNode<T> = {
   next: Option<DequeNode<T>>;
 };
 
+/**
+ * A double-ended queue.
+ * @typeParam T - The type of the elements in the queue.
+ * @group deque
+ */
 export class Deque<T> {
   private front: Option<DequeNode<T>>;
   private back: Option<DequeNode<T>>;
 
+  /**
+   * Create a new `Deque<T>` from an iterable.
+   * @param iterable - The iterable to create the deque from.
+   * @returns A new `Deque<T>`.
+   *
+   * @group deque
+   */
   static from<T>(iterable: Iterable<T>): Deque<T> {
     const deque = new Deque<T>();
     for (const item of iterable) {
@@ -25,6 +66,12 @@ export class Deque<T> {
     this.back = none;
   }
 
+  /**
+   * Add an item to the front of the deque.
+   * @param item - The item to add to the front of the deque.
+   *
+   * @group deque
+   */
   public pushFront(item: T) {
     if (this.front.isNone()) {
       const node = Some({ id: Symbol(), value: item, prev: None, next: None });
@@ -42,6 +89,12 @@ export class Deque<T> {
     }
   }
 
+  /**
+   * Add an item to the back of the deque.
+   * @param item - The item to add to the back of the deque.
+   *
+   * @group deque
+   */
   public pushBack(item: T) {
     if (this.back.isNone()) {
       const node = Some({ id: Symbol(), value: item, prev: None, next: None });
@@ -59,6 +112,12 @@ export class Deque<T> {
     }
   }
 
+  /**
+   * Remove and return the item from the front of the deque.
+   * @returns The item from the front of the deque, or `None` if the deque is empty.
+   *
+   * @group deque
+   */
   public popFront(): Option<T> {
     const value = this.peekFront();
     if (
@@ -77,6 +136,12 @@ export class Deque<T> {
     return value;
   }
 
+  /**
+   * Remove and return the item from the back of the deque.
+   * @returns The item from the back of the deque, or `None` if the deque is empty.
+   *
+   * @group deque
+   */
   public popBack(): Option<T> {
     const value = this.peekBack();
     if (
@@ -94,14 +159,29 @@ export class Deque<T> {
     return value;
   }
 
+  /**
+   * Peek the item from the front of the deque.
+   * @returns The item from the front of the deque, or `None` if the deque is empty.
+   *
+   * @group deque
+   */
   public peekFront(): Option<T> {
     return this.front.map((node) => node.value);
   }
 
+  /**
+   * Peek the item from the back of the deque.
+   * @returns The item from the back of the deque, or `None` if the deque is empty.
+   *
+   * @group deque
+   */
   public peekBack(): Option<T> {
     return this.back.map((node) => node.value);
   }
 
+  /**
+   * @hidden
+   */
   public [Symbol.iterator]() {
     let current = this.front;
     return {
