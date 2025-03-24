@@ -140,13 +140,11 @@ export class Deque<T> {
    */
   public popFront(): Option<T> {
     const value = this.peekFront();
-    if (
-      this.front.map((node) => node.id).unwrapOr(Symbol()) ===
-      this.back.map((node) => node.id).unwrapOr(Symbol())
-    ) {
-      const none = None;
-      this.front = none;
-      this.back = none;
+    const frontId = this.front.map((node) => node.id);
+    const backId = this.back.map((node) => node.id);
+    if (frontId.equals(backId)) {
+      this.front = None;
+      this.back = None;
     } else {
       const prev = this.front.unwrap().prev;
       prev.unwrap().next = None;
@@ -164,10 +162,9 @@ export class Deque<T> {
    */
   public popBack(): Option<T> {
     const value = this.peekBack();
-    if (
-      this.front.map((node) => node.id).unwrapOr(Symbol()) ===
-      this.back.map((node) => node.id).unwrapOr(Symbol())
-    ) {
+    const frontId = this.front.map((node) => node.id);
+    const backId = this.back.map((node) => node.id);
+    if (frontId.equals(backId)) {
       this.front = None;
       this.back = None;
     } else {

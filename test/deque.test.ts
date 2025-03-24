@@ -40,6 +40,7 @@ describe("Deque", () => {
     expect(deque.peekFront().unwrap()).toEqual(1);
     expect(deque.popFront().unwrap()).toEqual(1);
     expect(deque.peekFront().isNone()).toBe(true);
+    expect(deque.popFront().isNone()).toBe(true);
   });
 
   test("pushBack", () => {
@@ -58,6 +59,7 @@ describe("Deque", () => {
     expect(deque.peekBack().unwrap()).toEqual(1);
     expect(deque.popBack().unwrap()).toEqual(1);
     expect(deque.peekBack().isNone()).toBe(true);
+    expect(deque.popBack().isNone()).toBe(true);
   });
 
   test("deque", () => {
