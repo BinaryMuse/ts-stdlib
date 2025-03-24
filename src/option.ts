@@ -223,7 +223,7 @@ interface OptionMethods<T> {
    * @returns {T} The wrapped value.
    * @group Unwrap Methods
    */
-  unwrapOr: (defaultValue: T | null) => T | null;
+  unwrapOr: <U>(defaultValue: T | U) => T | U;
   /**
    * Returns the wrapped value. If the option is `None`, this will call the provided function and return its result.
    * This function is useful for providing a default value that is expensive to compute or has side effects.
@@ -241,7 +241,7 @@ interface OptionMethods<T> {
    * @returns {T} The wrapped value.
    * @group Unwrap Methods
    */
-  unwrapOrElse: (fn: () => T | null) => T | null;
+  unwrapOrElse: <U>(fn: () => T | U) => T | U;
   /**
    * Returns the wrapped value. If the option is `None`, this will throw an error with the provided message.
    *
