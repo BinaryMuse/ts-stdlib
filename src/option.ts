@@ -447,8 +447,8 @@ interface OptionMethods<T> {
    * const opt = Some(Some(1));
    * const result = opt.flatten(); // Some(1)
    *
-   * const opt2 = Some(Some(1));
-   * const result2 = opt2.flatten(); // Some(1)
+   * const opt2 = Some(Some(Some(1)));
+   * const result2 = opt2.flatten(); // Some(Some(1))
    *
    * const none = None;
    * const result3 = none.flatten(); // None
