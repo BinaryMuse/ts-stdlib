@@ -3,6 +3,8 @@
  * at both ends. It's implemented as a doubly-linked list, making it ideal for
  * situations where you need to add or remove elements from either end in constant time.
  *
+ * `Deque` also implements the `Iterable` interface, so you can use it in a `for...of` loop.
+ *
  * ## Examples
  *
  * ```ts
@@ -19,6 +21,16 @@
  *
  * deque.popBack();   // Some(1)
  * deque.popFront();  // None
+ * ```
+ *
+ * ```ts
+ * const deque = Deque.from([1, 2, 3]);
+ * for (const item of deque) {
+ *   console.log(item);
+ * }
+ * // 1
+ * // 2
+ * // 3
  * ```
  *
  * @module Deque
@@ -47,6 +59,14 @@ export class Deque<T> {
 
   /**
    * Create a new `Deque<T>` from an iterable.
+   *
+   * @example
+   * ```ts
+   * const deque = Deque.from([1, 2, 3]);
+   * deque.peekFront(); // Some(1)
+   * deque.peekBack(); // Some(3)
+   * ```
+   *
    * @param iterable - The iterable to create the deque from.
    * @returns A new `Deque<T>`.
    *

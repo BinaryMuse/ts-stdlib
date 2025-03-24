@@ -24,10 +24,14 @@
  * function will be called automatically. Weak references can still exist at this point,
  * but they can no longer be upgraded to strong references.
  *
+ * An `Rc<T>` is a proxy to the inner object, so you can use the `Rc` to access all the
+ * properties and methods of the inner object (assuming the reference is not disposed).
+ *
  * ## Example:
  *
  * ```typescript
  * const resource = Rc(connection, conn => conn.close());
+ * resource.query("SELECT count(*) FROM users");
  *
  * // Creates another strong reference
  * const ref2 = Rc.clone(resource);
@@ -328,6 +332,12 @@ function createProxy<T extends object>(id: number, inner: RcInner<T>) {
 /**
  * Creates a new strong reference to an object.
  *
+ * @example
+ * ```typescript
+ * const resource = Rc(connection, conn => conn.close());
+ * resource.query("SELECT count(*) FROM users");
+ * ```
+ *
  * @param object - The object to wrap.
  * @param dispose - A function to call when the last reference is disposed.
  * @returns A new reference-counted object.
@@ -344,6 +354,13 @@ function Rc<T extends object>(object: T, dispose: (data: T) => void): Rc<T> {
 /**
  * Clones a reference-counted object.
  *
+ * @example
+ * ```typescript
+ * const resource = Rc(connection, conn => conn.close());
+ * const ref2 = Rc.clone(resource);
+ * ref2.query("SELECT count(*) FROM users");
+ * ```
+ *
  * @param rc - The reference-counted object to clone.
  * @returns A new reference-counted object that is a clone of the original.
  *
@@ -355,6 +372,12 @@ Rc.clone = function <T>(rc: Rc<T>): Rc<T> {
 
 /**
  * Disposes a reference-counted object.
+ *
+ * @example
+ * ```typescript
+ * const resource = Rc(connection, conn => conn.close());
+ * Rc.dispose(resource);
+ * ```
  *
  * @param rc - The reference-counted object to dispose.
  *
@@ -371,6 +394,12 @@ Rc.dispose = function <T>(rc: Rc<T> | Weak<T>) {
 /**
  * Creates a weak reference to a reference-counted object.
  *
+ * @example
+ * ```typescript
+ * const resource = Rc(connection, conn => conn.close());
+ * const weak = Rc.weak(resource);
+ * ```
+ *
  * @param rc - The reference-counted object to create a weak reference to.
  * @returns A weak reference to the reference-counted object.
  *
@@ -384,6 +413,12 @@ Rc.weak = function <T>(rc: Rc<T>): Weak<T> {
  * Creates a weak reference to a reference-counted object, disposing of
  * the original reference in the process.
  *
+ * @example
+ * ```typescript
+ * const resource = Rc(connection, conn => conn.close());
+ * const weak = Rc.intoWeak(resource);
+ * ```
+ *
  * @param rc - The reference-counted object to create a weak reference to.
  * @returns A weak reference to the reference-counted object.
  *
@@ -395,6 +430,18 @@ Rc.intoWeak = function <T>(rc: Rc<T>): Weak<T> {
 
 /**
  * Attempts to upgrade a weak reference to a strong reference.
+ *
+ * @example
+ * ```typescript
+ * const resource = Rc(connection, conn => conn.close());
+ * const weak = Rc.weak(resource);
+ * const strong = Rc.upgrade(weak); // Returns Some(Rc<T>)
+ * strong.unwrap().query("SELECT count(*) FROM users");
+ *
+ * Rc.dispose(strong);
+ * Rc.dispose(resource);
+ * Rc.upgrade(weak); // Returns None
+ * ```
  *
  * @param weak - The weak reference to upgrade.
  * @returns A strong reference to the reference-counted object, or `None` if
@@ -408,6 +455,12 @@ Rc.upgrade = function <T>(weak: Weak<T>): Option<Rc<T>> {
 
 /**
  * Inspects a reference-counted object or weak reference.
+ *
+ * @example
+ * ```typescript
+ * const resource = Rc(connection, conn => conn.close());
+ * const info = Rc.inspect(resource);
+ * ```
  *
  * @param rc - The reference-counted object or weak reference to inspect.
  * @returns Information about the reference-counted object or weak reference.

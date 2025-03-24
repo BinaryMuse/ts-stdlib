@@ -128,12 +128,30 @@ interface OptionMethods<T> {
   /**
    * Returns `true` if the value is a `Some`.
    *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.isSome(); // true
+   *
+   * const none = None;
+   * const result2 = none.isSome(); // false
+   * ```
+   *
    * @returns {boolean} `true` if the value is a `Some`, `false` otherwise.
    * @group Query Methods
    */
   isSome: () => boolean;
   /**
    * Returns `true` if the value is a `Some` and the given function returns `true`.
+   *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.isSomeAnd(value => value > 0); // true
+   *
+   * const none = None;
+   * const result2 = none.isSomeAnd(value => value > 0); // false
+   * ```
    *
    * @param fn - A function that takes the wrapped value and returns a boolean.
    * @returns {boolean} `true` if the value is a `Some` and the given function returns `true`, `false` otherwise.
@@ -143,12 +161,30 @@ interface OptionMethods<T> {
   /**
    * Returns `true` if the value is a `None`.
    *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.isNone(); // false
+   *
+   * const none = None;
+   * const result2 = none.isNone(); // true
+   * ```
+   *
    * @returns {boolean} `true` if the value is a `None`, `false` otherwise.
    * @group Query Methods
    */
   isNone: () => boolean;
   /**
    * Returns `true` if the value is a `None` or the given function returns `true`.
+   *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.isNoneOr(value => value > 0); // true
+   *
+   * const none = None;
+   * const result2 = none.isNoneOr(value => value > 0); // true
+   * ```
    *
    * @param fn - A function that takes the wrapped value and returns a boolean.
    * @returns {boolean} `true` if the value is a `None` or the given function returns `true`, `false` otherwise.
@@ -158,12 +194,30 @@ interface OptionMethods<T> {
   /**
    * Returns the wrapped value. If the option is `None`, this will throw an error.
    *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.unwrap(); // 1
+   *
+   * const none = None;
+   * const result2 = none.unwrap(); // throws Error
+   * ```
+   *
    * @returns {T} The wrapped value.
    * @group Unwrap Methods
    */
   unwrap: () => T;
   /**
    * Returns the wrapped value. If the option is `None`, this will return the provided default value.
+   *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.unwrapOr(0); // 1
+   *
+   * const none = None;
+   * const result2 = none.unwrapOr(0); // 0
+   * ```
    *
    * @param defaultValue - The value to return if the option is `None`.
    * @returns {T} The wrapped value.
@@ -172,6 +226,16 @@ interface OptionMethods<T> {
   unwrapOr: (defaultValue: T) => T;
   /**
    * Returns the wrapped value. If the option is `None`, this will call the provided function and return its result.
+   * This function is useful for providing a default value that is expensive to compute or has side effects.
+   *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.unwrapOrElse(() => 0); // 1
+   *
+   * const none = None;
+   * const result2 = none.unwrapOrElse(() => 0); // 0
+   * ```
    *
    * @param fn - A function that returns the default value if the option is `None`.
    * @returns {T} The wrapped value.
@@ -181,6 +245,15 @@ interface OptionMethods<T> {
   /**
    * Returns the wrapped value. If the option is `None`, this will throw an error with the provided message.
    *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.expect("Expected a value"); // 1
+   *
+   * const none = None;
+   * const result2 = none.expect("Expected a value"); // throws Error
+   * ```
+   *
    * @param msg - The message to throw if the option is `None`.
    * @returns {T} The wrapped value.
    * @group Unwrap Methods
@@ -189,6 +262,15 @@ interface OptionMethods<T> {
 
   /**
    * Returns an `Option<U>` by mapping the inner value of the source option with `fn`.
+   *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.map(value => String(value)); // Some("1")
+   *
+   * const none = None;
+   * const result2 = none.map(value => String(value)); // None
+   * ```
    *
    * @typeParam U - The type of the new wrapped value.
    * @param fn - A function that takes the wrapped value and returns a new value.
@@ -201,10 +283,18 @@ interface OptionMethods<T> {
    * Returns an option wrapping the provided `defaultValue` if the option is `None`,
    * or calls `fn` with the inner value and returns a new option wrapping its return value.
    *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.mapOr("default", value => String(value)); // Some("1")
+   *
+   * const none = None;
+   * const result2 = none.mapOr("default", value => String(value)); // Some("default")
+   * ```
+   *
    * @typeParam U - The type of the new wrapped value.
    * @param defaultValue - The value to use if the option is `None`.
    * @param fn - A function that takes the wrapped value and returns a new value.
-   * @returns {Option<U>} A new option containing either the default or transformed value.
    * @group Transform Methods
    */
   mapOr: <U>(defaultValue: U, fn: (value: T) => U) => Option<U>;
@@ -212,6 +302,16 @@ interface OptionMethods<T> {
   /**
    * Returns an option wrapping the return value of `defaultFn` if the option is `None`,
    * or calls `mapFn` with the inner value and returns a new option wrapping its return value.
+   * This function is useful for providing a default value that is expensive to compute or has side effects.
+   *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.mapOrElse(() => "default", value => String(value)); // Some("1")
+   *
+   * const none = None;
+   * const result2 = none.mapOrElse(() => "default", value => String(value)); // Some("default")
+   * ```
    *
    * @typeParam U - The type of the new wrapped value.
    * @param defaultFn - A function that returns the default value if the option is `None`.
@@ -224,6 +324,15 @@ interface OptionMethods<T> {
   /**
    * Returns `None` if the source option is `None`, otherwise returns `other`.
    *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.and(Some(2)); // Some(2)
+   *
+   * const none = None;
+   * const result2 = none.and(Some(2)); // None
+   * ```
+   *
    * @typeParam U - The type of the new wrapped value.
    * @param other - The option to return if this option is `Some`.
    * @returns {Option<U>} Either `None` or the provided option.
@@ -235,6 +344,15 @@ interface OptionMethods<T> {
    * Returns `None` if the source option is `None`, otherwise calls `fn`
    * with the inner value and returns the result.
    *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.andThen(value => Some(value * 2)); // Some(2)
+   *
+   * const none = None;
+   * const result2 = none.andThen(value => Some(value * 2)); // None
+   * ```
+   *
    * @typeParam U - The type of the new wrapped value.
    * @param fn - A function that takes the wrapped value and returns a new option.
    * @returns {Option<U>} The result of `fn` or `None`.
@@ -245,6 +363,15 @@ interface OptionMethods<T> {
   /**
    * Returns the source option if it is `Some`, otherwise returns `other`.
    *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.or(Some(2)); // Some(1)
+   *
+   * const none = None;
+   * const result2 = none.or(Some(2)); // Some(2)
+   * ```
+   *
    * @param other - The option to return if this option is `None`.
    * @returns {Option<T>} Either this option or the provided option.
    * @group Transform Methods
@@ -253,6 +380,16 @@ interface OptionMethods<T> {
 
   /**
    * Returns the source option if it is `Some`, otherwise calls `fn` and returns the result.
+   * This function is useful for providing a default value that is expensive to compute or has side effects.
+   *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.orElse(() => Some(2)); // Some(1)
+   *
+   * const none = None;
+   * const result2 = none.orElse(() => Some(2)); // Some(2)
+   * ```
    *
    * @param fn - A function that returns a new option.
    * @returns {Option<T>} Either this option or the result of `fn`.
@@ -262,6 +399,16 @@ interface OptionMethods<T> {
 
   /**
    * Returns the source option or `other` if exactly one of them is `Some`, otherwise returns `None`.
+   *
+   * @example
+   * ```typescript
+   * const opt1 = Some(1);
+   * const opt2 = Some(2);
+   * const result = opt1.xor(opt2); // None
+   *
+   * const none = None;
+   * const result2 = none.xor(Some(2)); // Some(2)
+   * ```
    *
    * @param other - The option to compare against.
    * @returns {Option<T>} Either this option, the other option, or `None`.
@@ -274,6 +421,18 @@ interface OptionMethods<T> {
    * - `Some<T>` with the original wrapped value if `fn` returns true
    * - `None` if `fn` returns false
    *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.filter(value => value > 0); // Some(1)
+   *
+   * const opt2 = Some(1);
+   * const result2 = opt2.filter(value => value < 0); // None
+   *
+   * const none = None;
+   * const result3 = none.filter(value => value > 0); // None
+   * ```
+   *
    * @param fn - A function that takes the wrapped value and returns a boolean.
    * @returns {Option<T>} Either this option or `None`.
    * @group Transform Methods
@@ -283,6 +442,18 @@ interface OptionMethods<T> {
   /**
    * Converts from `Option<Option<T>>` to `Option<T>`. Only one level of nesting is removed.
    *
+   * @example
+   * ```typescript
+   * const opt = Some(Some(1));
+   * const result = opt.flatten(); // Some(1)
+   *
+   * const opt2 = Some(Some(1));
+   * const result2 = opt2.flatten(); // Some(1)
+   *
+   * const none = None;
+   * const result3 = none.flatten(); // None
+   * ```
+   *
    * @returns {Option<T>} The flattened option.
    * @group Transform Methods
    */
@@ -291,6 +462,15 @@ interface OptionMethods<T> {
   /**
    * Converts the `Option<T>` into a `Result<T, E>`, mapping `Some(v)` to `Ok(v)`
    * and `None` to `Err(defaultValue)`.
+   *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.okOr("default error"); // Ok(1)
+   *
+   * const none = None;
+   * const result2 = none.okOr("default error"); // Err("default error")
+   * ```
    *
    * @typeParam E - The type of the error value.
    * @param defaultError - The error value to use if the option is `None`.
@@ -303,6 +483,15 @@ interface OptionMethods<T> {
    * Converts the `Option<T>` into a `Result<T, E>`, mapping `Some(v)` to `Ok(v)`
    * and `None` to `Err(fn())`.
    *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.okOrElse(() => "default error"); // Ok(1)
+   *
+   * const none = None;
+   * const result2 = none.okOrElse(() => "default error"); // Err("default error")
+   * ```
+   *
    * @typeParam E - The type of the error value.
    * @param fn - A function that returns the error value if the option is `None`.
    * @returns {Result<T, E>} A result containing either the wrapped value or the error.
@@ -314,6 +503,15 @@ interface OptionMethods<T> {
    * Returns the result of calling `cases.some()` with the inner value if the option is `Some`,
    * otherwise returns the result of calling `cases.none()`.
    *
+   * @example
+   * ```typescript
+   * const opt = Some(1);
+   * const result = opt.match({
+   *   some: (value) => value * 2,
+   *   none: () => 0,
+   * });
+   * ```
+   *
    * @typeParam U - The type of the result.
    * @param cases - An object containing functions to handle both `Some` and `None` cases.
    * @returns {U} The result of calling the appropriate function.
@@ -323,7 +521,24 @@ interface OptionMethods<T> {
 
   /**
    * Returns true if both options are `Some` and their inner values are equal using
-   * the JavaScript `==` operator, or if both options are `None`.
+   * the JavaScript `==` operator, or if both options are `None`. If the inner values
+   * are both `Option`s or `Result`s, then the comparison will be recursive using `equals`
+   * on the inner values.
+   *
+   * @example
+   * ```typescript
+   * const opt1 = Some(1);
+   * const opt2 = Some(1);
+   * const result = opt1.equals(opt2); // true
+   *
+   * const opt3 = Some(Ok(1));
+   * const opt4 = Some(Ok(1));
+   * const result2 = opt3.equals(opt4); // true
+   *
+   * const opt5 = Some(None);
+   * const opt6 = Some(None);
+   * const result3 = opt5.equals(opt6); // true
+   * ```
    *
    * @param other - The option to compare against.
    * @returns {boolean} Whether the options are equal.
@@ -333,9 +548,21 @@ interface OptionMethods<T> {
 
   /**
    * Returns true if both options are `Some` and their inner values are equal using
-   * the JavaScript `===` operator, or if both options are `None`.
+   * the JavaScript `===` operator, or if both options are `None`. If the inner values
+   * are both `Option`s or `Result`s, then the comparison will be recursive using `strictEquals`
+   * on the inner values.
    *
-   * @param other - The option to compare against.
+   * @example
+   * ```typescript
+   * const obj = {};
+   * const opt1 = Some(obj);
+   * const opt2 = Some(obj);
+   * const result = opt1.strictEquals(opt2); // true
+   *
+   * const opt3 = Some(None);
+   * const opt4 = Some(None);
+   * const result2 = opt3.strictEquals(opt4); // true
+   * ```
    * @returns {boolean} Whether the options are strictly equal.
    * @group Equality Checks
    */

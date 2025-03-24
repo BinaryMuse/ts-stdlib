@@ -7,13 +7,20 @@
  *
  * ## Overview
  *
- * A `Result<T, E>` is a value that represents either a successful computation (`Ok<T>`) or an error (`Err<E>`). It's similar to try/catch blocks, but provides a more functional approach to handling errors and composing operations that might fail.
+ * A `Result<T, E>` is a value that represents either a successful computation (`Ok<T>`) or an error (`Err<E>`).
+ * It's similar to try/catch blocks, but provides a more functional approach to handling errors and
+ * composing operations that might fail.
  *
- * To create a `Result` representing a successful computation of type `T`, use the `Ok` function. For example: `const result = Ok(value)`. If you want to create a `Result` representing an error of type `E`, use `Err`. For example: `const error = Err(new Error("Something went wrong"))`.
+ * To create a `Result` representing a successful computation of type `T`, use the `Ok` function.
+ * For example: `const result = Ok(value)`. If you want to create a `Result` representing an error of
+ * type `E`, use `Err`. For example: `const error = Err(new Error("Something went wrong"))`.
  *
- * To get the successful value, call `unwrap()` on the `Result`. If the result is `Err`, then `unwrap()` will throw the error; thus, it's important to check if a result is `Ok` or `Err` before accessing the value, or use a method that provides a default value in case of `Err`, like `unwrapOr(defaultValue)`.
+ * To get the successful value, call `unwrap()` on the `Result`. If the result is `Err`, then `unwrap()`
+ * will throw the error; thus, it's important to check if a result is `Ok` or `Err` before accessing
+ * the value, or use a method that provides a default value in case of `Err`, like `unwrapOr(defaultValue)`.
  *
- * `Result` provides several methods for transforming results and handling errors in a clean, functional way. By using these methods, we can avoid many try/catch blocks and make our error handling more explicit.
+ * `Result` provides several methods for transforming results and handling errors in a clean, functional way.
+ * By using these methods, we can avoid many try/catch blocks and make our error handling more explicit.
  *
  * ## Examples
  *
@@ -117,6 +124,15 @@ interface ResultMethods<T, E> {
   /**
    * Returns `true` if the result is `Ok`.
    *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const isOk = result.isOk(); // true
+   *
+   * const result2 = Err("error");
+   * const isOk2 = result2.isOk(); // false
+   * ```
+   *
    * @returns {boolean} `true` if the result is `Ok`, `false` otherwise.
    * @group Query Methods
    */
@@ -124,6 +140,15 @@ interface ResultMethods<T, E> {
 
   /**
    * Returns `true` if the result is `Ok` and the given function returns `true`.
+   *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const isOkAnd = result.isOkAnd(value => value > 0); // true
+   *
+   * const result2 = Err("error");
+   * const isOkAnd2 = result2.isOkAnd(value => value > 0); // false
+   * ```
    *
    * @param fn - A function that takes the success value and returns a boolean.
    * @returns {boolean} `true` if the result is `Ok` and the given function returns `true`, `false` otherwise.
@@ -134,6 +159,15 @@ interface ResultMethods<T, E> {
   /**
    * Returns `true` if the result is `Err`.
    *
+   * @example
+   * ```typescript
+   * const result = Err("error");
+   * const isErr = result.isErr(); // true
+   *
+   * const result2 = Ok(1);
+   * const isErr2 = result2.isErr(); // false
+   * ```
+   *
    * @returns {boolean} `true` if the result is `Err`, `false` otherwise.
    * @group Query Methods
    */
@@ -141,6 +175,15 @@ interface ResultMethods<T, E> {
 
   /**
    * Returns `true` if the result is `Err` and the given function returns `true`.
+   *
+   * @example
+   * ```typescript
+   * const result = Err("error");
+   * const isErrAnd = result.isErrAnd(error => error === "error"); // true
+   *
+   * const result2 = Ok(1);
+   * const isErrAnd2 = result2.isErrAnd(error => error === "error"); // false
+   * ```
    *
    * @param fn - A function that takes the error value and returns a boolean.
    * @returns {boolean} `true` if the result is `Err` and the given function returns `true`, `false` otherwise.
@@ -151,6 +194,15 @@ interface ResultMethods<T, E> {
   /**
    * Returns the success value. If the result is `Err`, this will throw an error.
    *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const value = result.unwrap(); // 1
+   *
+   * const result2 = Err("error");
+   * const value2 = result2.unwrap(); // throws Error
+   * ```
+   *
    * @returns {T} The success value.
    * @group Unwrap Methods
    */
@@ -158,6 +210,15 @@ interface ResultMethods<T, E> {
 
   /**
    * Returns the success value. If the result is `Err`, this will return the provided default value.
+   *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const value = result.unwrapOr(0); // 1
+   *
+   * const result2 = Err("error");
+   * const value2 = result2.unwrapOr(0); // 0
+   * ```
    *
    * @param defaultValue - The value to return if the result is `Err`.
    * @returns {T} The success value or the default value.
@@ -167,6 +228,16 @@ interface ResultMethods<T, E> {
 
   /**
    * Returns the success value. If the result is `Err`, this will call the provided function and return its result.
+   * This function is useful for providing a default value that is expensive to compute or has side effects.
+   *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const value = result.unwrapOrElse(() => 0); // 1
+   *
+   * const result2 = Err("error");
+   * const value2 = result2.unwrapOrElse(() => 0); // 0
+   * ```
    *
    * @param fn - A function that returns the default value if the result is `Err`.
    * @returns {T} The success value or the result of the function.
@@ -177,6 +248,15 @@ interface ResultMethods<T, E> {
   /**
    * Returns the error value. If the result is `Ok`, this will throw an error.
    *
+   * @example
+   * ```typescript
+   * const result = Err("error");
+   * const error = result.unwrapErr(); // "error"
+   *
+   * const result2 = Ok(1);
+   * const error2 = result2.unwrapErr(); // throws Error
+   * ```
+   *
    * @returns {E} The error value.
    * @group Unwrap Methods
    */
@@ -184,6 +264,15 @@ interface ResultMethods<T, E> {
 
   /**
    * Returns the success value. If the result is `Err`, this will throw an error with the provided message.
+   *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const value = result.expect("Expected a value"); // 1
+   *
+   * const result2 = Err("error");
+   * const value2 = result2.expect("Expected a value"); // throws Error
+   * ```
    *
    * @param msg - The message to throw if the result is `Err`.
    * @returns {T} The success value.
@@ -194,6 +283,15 @@ interface ResultMethods<T, E> {
   /**
    * Returns the error value. If the result is `Ok`, this will throw an error with the provided message.
    *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const value = result.expectErr("Expected an error"); // throws Error
+   *
+   * const result2 = Err("error");
+   * const value2 = result2.expectErr("Expected an error"); // "error"
+   * ```
+   *
    * @param msg - The message to throw if the result is `Ok`.
    * @returns {E} The error value.
    * @group Unwrap Methods
@@ -202,6 +300,14 @@ interface ResultMethods<T, E> {
 
   /**
    * Returns `other` if the result is `Ok`, otherwise returns the current error.
+   *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const result2 = Err("error");
+   * const result3 = result.and(result2); // Ok(1)
+   * const result4 = result2.and(result); // Err("error")
+   * ```
    *
    * @typeParam U - The type of the success value in the new result.
    * @param other - The result to return if this result is `Ok`.
@@ -213,6 +319,14 @@ interface ResultMethods<T, E> {
   /**
    * Returns `None` if the result is `Err`, otherwise calls `fn` with the success value and returns the result.
    *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const result2 = Err("error");
+   * const result3 = result.andThen(value => Ok(value * 2)); // Ok(2)
+   * const result4 = result2.andThen(value => Ok(value * 2)); // Err("error")
+   * ```
+   *
    * @typeParam U - The type of the success value in the new result.
    * @param fn - A function that takes the success value and returns a new result.
    * @returns {Result<U, E>} The result of `fn` or an error result.
@@ -223,6 +337,14 @@ interface ResultMethods<T, E> {
   /**
    * Returns the current result if it is `Ok`, otherwise returns `other`.
    *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const result2 = Err("error");
+   * const result3 = result.or(result2); // Ok(1)
+   * const result4 = result2.or(result); // Ok(1)
+   * ```
+   *
    * @typeParam U - The type of the success value in the other result.
    * @param other - The result to return if this result is `Err`.
    * @returns {Result<U, E>} Either this result or the provided result.
@@ -232,6 +354,15 @@ interface ResultMethods<T, E> {
 
   /**
    * Returns the current result if it is `Ok`, otherwise calls `fn` and returns the result.
+   * This function is useful for providing a default result that is expensive to compute or has side effects.
+   *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const result2 = Err("error");
+   * const result3 = result.orElse(() => result2); // Ok(1)
+   * const result4 = result2.orElse(() => result); // Ok(1)
+   * ```
    *
    * @typeParam U - The type of the success value in the new result.
    * @param fn - A function that returns a new result.
@@ -242,6 +373,14 @@ interface ResultMethods<T, E> {
 
   /**
    * Maps a `Result<T, E>` to `Result<U, E>` by applying the function to the success value.
+   *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const result2 = result.map(value => value * 2); // Ok(2)
+   * const result3 = Err("error");
+   * const result4 = result3.map(value => value * 2); // Err("error")
+   * ```
    *
    * @typeParam U - The type of the new success value.
    * @param fn - A function that takes the success value and returns a new value.
@@ -254,6 +393,14 @@ interface ResultMethods<T, E> {
    * Returns a result wrapping the provided `defaultValue` if the result is `Err`,
    * or calls `fn` with the success value and returns a new result wrapping its return value.
    *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const result2 = Err("error");
+   * const result3 = result.mapOr(0, value => value * 2); // Ok(2)
+   * const result4 = result2.mapOr(0, value => value * 2); // Ok(0)
+   * ```
+   *
    * @typeParam U - The type of the new success value.
    * @param defaultValue - The value to use if the result is `Err`.
    * @param fn - A function that takes the success value and returns a new value.
@@ -265,6 +412,15 @@ interface ResultMethods<T, E> {
   /**
    * Returns a result wrapping the return value of `defaultFn` if the result is `Err`,
    * or calls `mapFn` with the success value and returns a new result wrapping its return value.
+   * This function is useful for providing a default result that is expensive to compute or has side effects.
+   *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const result2 = Err("error");
+   * const result3 = result.mapOrElse(() => 0, value => value * 2); // Ok(2)
+   * const result4 = result2.mapOrElse(() => 0, value => value * 2); // Ok(0)
+   * ```
    *
    * @typeParam U - The type of the new success value.
    * @param defaultFn - A function that returns the default value if the result is `Err`.
@@ -277,6 +433,14 @@ interface ResultMethods<T, E> {
   /**
    * Maps a `Result<T, E>` to `Result<T, U>` by applying the function to the error value.
    *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const result2 = Err("error");
+   * const result3 = result.mapErr(error => error.toUpperCase()); // Ok(1)
+   * const result4 = result2.mapErr(error => error.toUpperCase()); // Err("ERROR")
+   * ```
+   *
    * @typeParam U - The type of the new error value.
    * @param fn - A function that takes the error value and returns a new error value.
    * @returns {Result<T, U>} A new result with the transformed error value.
@@ -287,6 +451,14 @@ interface ResultMethods<T, E> {
   /**
    * Converts from `Result<Result<T, E>, E>` to `Result<T, E>`. Only one level of nesting is removed.
    *
+   * @example
+   * ```typescript
+   * const result = Ok(Ok(1));
+   * const result2 = Err(Err("error"));
+   * const result3 = result.flatten(); // Ok(1)
+   * const result4 = result2.flatten(); // Err("error")
+   * ```
+   *
    * @returns {Result<T, E>} The flattened result.
    * @group Transform Methods
    */
@@ -295,6 +467,14 @@ interface ResultMethods<T, E> {
   /**
    * Calls `fn` with the success value if the result is `Ok`, otherwise does nothing.
    * Returns the original result.
+   *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const result2 = Err("error");
+   * const result3 = result.inspect(value => console.log(value)); // logs 1, returns result
+   * const result4 = result2.inspect(value => console.log(value)); // Does nothing, returns result2
+   * ```
    *
    * @param fn - A function that takes the success value.
    * @returns {Result<T, E>} The original result.
@@ -306,6 +486,14 @@ interface ResultMethods<T, E> {
    * Calls `fn` with the error value if the result is `Err`, otherwise does nothing.
    * Returns the original result.
    *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const result2 = Err("error");
+   * const result3 = result.inspectErr(error => console.log(error)); // Does nothing, returns result
+   * const result4 = result2.inspectErr(error => console.log(error)); // logs "error", returns result2
+   * ```
+   *
    * @param fn - A function that takes the error value.
    * @returns {Result<T, E>} The original result.
    * @group Inspect Methods
@@ -316,6 +504,14 @@ interface ResultMethods<T, E> {
    * Converts the `Result<T, E>` into an `Option<T>`, mapping `Ok(v)` to `Some(v)`
    * and `Err(_)` to `None`.
    *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const option = result.ok(); // Some(1)
+   * const result2 = Err("error");
+   * const option2 = result2.ok(); // None
+   * ```
+   *
    * @returns {Option<T>} An option containing the success value.
    * @group Transform Methods
    */
@@ -325,6 +521,14 @@ interface ResultMethods<T, E> {
    * Converts the `Result<T, E>` into an `Option<E>`, mapping `Ok(_)` to `None`
    * and `Err(e)` to `Some(e)`.
    *
+   * @example
+   * ```typescript
+   * const result = Ok(1);
+   * const option = result.err(); // None
+   * const result2 = Err("error");
+   * const option2 = result2.err(); // Some("error")
+   * ```
+   *
    * @returns {Option<E>} An option containing the error value.
    * @group Transform Methods
    */
@@ -333,7 +537,17 @@ interface ResultMethods<T, E> {
   /**
    * Returns true if both results are `Ok` and their success values are equal using
    * the JavaScript `==` operator, or if both results are `Err` and their error values
-   * are equal using the JavaScript `==` operator.
+   * are equal using the JavaScript `==` operator. If the inner values are `Result`s or
+   * `Option`s, they will be compared using their own `equals` method.
+   *
+   * @example
+   * ```typescript
+   * Ok(1).equals(Ok(1)); // true
+   * Ok(Ok(1)).equals(Ok(Ok(1))); // true
+   * Ok(Some(1)).equals(Ok(Some(1))); // true
+   * Ok(Err(1)).equals(Ok(Err(1))); // true
+   * Err(1).equals(Err(1)); // true
+   * Err(1).equals(Ok(1)); // false
    *
    * @param other - The result to compare against.
    * @returns {boolean} Whether the results are equal.
@@ -344,7 +558,19 @@ interface ResultMethods<T, E> {
   /**
    * Returns true if both results are `Ok` and their success values are equal using
    * the JavaScript `===` operator, or if both results are `Err` and their error values
-   * are equal using the JavaScript `===` operator.
+   * are equal using the JavaScript `===` operator. If the inner values are `Result`s or
+   * `Option`s, they will be compared using their own `strictEquals` method.
+   *
+   * @example
+   * ```typescript
+   * const obj = {}
+   *
+   * Ok(obj).strictEquals(Ok(obj)); // true
+   * Ok(obj).strictEquals(Ok({})); // false
+   * Err(obj).strictEquals(Err(obj)); // true
+   * Err(obj).strictEquals(Err({})); // false
+   * Ok(Some(obj)).strictEquals(Ok(Some(obj))); // true
+   * ```
    *
    * @param other - The result to compare against.
    * @returns {boolean} Whether the results are strictly equal.
