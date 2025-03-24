@@ -1,6 +1,6 @@
 {
   "name": "@binarymuse/ts-stdlib",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A collection of useful utility types for TypeScript, including Option, Result, and more",
   "repository": {
     "type": "git",
