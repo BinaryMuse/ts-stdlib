@@ -789,7 +789,7 @@ const SomePrototype: OptionMethods<any> = {
  *
  * @group option
  */
-export function Some<T>(value: T): Option<T> {
+export function Some<T>(value: T | null | undefined): Option<T> {
   // TODO: move this to an `Option()` function???
   if (value === undefined || value === null) {
     return None;

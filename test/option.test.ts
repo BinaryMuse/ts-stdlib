@@ -262,4 +262,9 @@ describe("Option", () => {
 
     expect(doubleNested1.strictEquals(doubleNested2)).toEqual(true);
   });
+
+  it("converts null and undefined to None", () => {
+    const opt = Some<number>(null);
+    expect(opt.isNone()).toBe(true);
+  });
 });
