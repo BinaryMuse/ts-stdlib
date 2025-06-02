@@ -80,7 +80,7 @@
  * }
  * ```
  *
- * Since calling `Some(value)` when `value` is `null` or `undefined` returns `None`, we can easily wrap external APIs that don't use options:
+ * Since calling `Some(value)` when `value` is `null` or `undefined` returns `None` by default, we can easily wrap external APIs that don't use options:
  *
  * ```typescript
  * interface Tree {
@@ -106,6 +106,19 @@
  *     // If `Some`, return the inner value, otherwise return `defaultData`
  *     .unwrapOr(defaultData);
  * }
+ * ```
+ *
+ * If you want to prevent `Some` from converting `null` and `undefined` to `None`, you can pass `false` as the second argument to `Some` and the other API methods:
+ *
+ * ```typescript
+ * const opt = Some(null, false);
+ * expect(opt.isSome()).toBe(true);
+ *
+ * const opt2 = opt.map(value => value)
+ * expect(opt2.isSome()).toBe(false);
+ *
+ * const opt3 = opt.map(value => value, false)
+ * expect(opt3.isSome()).toBe(true);
  * ```
  *
  * @see {@link OptionMethods} for more information on the methods available on `Option`.
@@ -274,10 +287,11 @@ interface OptionMethods<T> {
    *
    * @typeParam U - The type of the new wrapped value.
    * @param fn - A function that takes the wrapped value and returns a new value.
+   * @param nullAndUndefinedToNone - Whether to convert `null` and `undefined` to `None`; defaults to `true`.
    * @returns {Option<U>} A new option containing the transformed value.
    * @group Transform Methods
    */
-  map: <U>(fn: (value: T) => U) => Option<U>;
+  map: <U>(fn: (value: T) => U, nullAndUndefinedToNone?: boolean) => Option<U>;
 
   /**
    * Returns an option wrapping the provided `defaultValue` if the option is `None`,
@@ -295,9 +309,14 @@ interface OptionMethods<T> {
    * @typeParam U - The type of the new wrapped value.
    * @param defaultValue - The value to use if the option is `None`.
    * @param fn - A function that takes the wrapped value and returns a new value.
+   * @param nullAndUndefinedToNone - Whether to convert `null` and `undefined` to `None`; defaults to `true`.
    * @group Transform Methods
    */
-  mapOr: <U>(defaultValue: U, fn: (value: T) => U) => Option<U>;
+  mapOr: <U>(
+    defaultValue: U,
+    fn: (value: T) => U,
+    nullAndUndefinedToNone?: boolean
+  ) => Option<U>;
 
   /**
    * Returns an option wrapping the return value of `defaultFn` if the option is `None`,
@@ -316,10 +335,15 @@ interface OptionMethods<T> {
    * @typeParam U - The type of the new wrapped value.
    * @param defaultFn - A function that returns the default value if the option is `None`.
    * @param mapFn - A function that takes the wrapped value and returns a new value.
+   * @param nullAndUndefinedToNone - Whether to convert `null` and `undefined` to `None`; defaults to `true`.
    * @returns {Option<U>} A new option containing either the default or transformed value.
    * @group Transform Methods
    */
-  mapOrElse: <U>(defaultFn: () => U, mapFn: (value: T) => U) => Option<U>;
+  mapOrElse: <U>(
+    defaultFn: () => U,
+    mapFn: (value: T) => U,
+    nullAndUndefinedToNone?: boolean
+  ) => Option<U>;
 
   /**
    * Returns `None` if the source option is `None`, otherwise returns `other`.
@@ -626,14 +650,21 @@ const NonePrototype: OptionMethods<any> = {
   expect(msg: string): never {
     throw new Error(msg);
   },
-  map<U>(_fn: (value: never) => U) {
+  map<U>(_fn: (value: never, nullAndUndefinedToNone?: boolean) => U) {
     return None;
   },
-  mapOr<U>(defaultValue: U, _fn: (value: never) => U) {
+  mapOr<U>(
+    defaultValue: U,
+    _fn: (value: never, nullAndUndefinedToNone?: boolean) => U
+  ) {
     return Some(defaultValue);
   },
-  mapOrElse<U>(defaultFn: () => U, _mapFn: (value: never) => U) {
-    return Some(defaultFn());
+  mapOrElse<U>(
+    defaultFn: () => U,
+    _mapFn: (value: never, nullAndUndefinedToNone?: boolean) => U,
+    nullAndUndefinedToNone?: boolean
+  ) {
+    return Some(defaultFn(), nullAndUndefinedToNone);
   },
   and<U>(_other: Option<U>) {
     return None;
@@ -698,14 +729,28 @@ const SomePrototype: OptionMethods<any> = {
   expect<T>(this: Some<T>, _msg: string) {
     return this.value;
   },
-  map<T, U>(this: Some<T>, fn: (value: T) => U) {
-    return Some(fn(this.value));
+  map<T, U>(
+    this: Some<T>,
+    fn: (value: T) => U,
+    nullAndUndefinedToNone: boolean = true
+  ) {
+    return Some(fn(this.value), nullAndUndefinedToNone);
   },
-  mapOr<T, U>(this: Some<T>, _defaultValue: U, fn: (value: T) => U) {
-    return Some(fn(this.value));
+  mapOr<T, U>(
+    this: Some<T>,
+    _defaultValue: U,
+    fn: (value: T) => U,
+    nullAndUndefinedToNone: boolean = true
+  ) {
+    return Some(fn(this.value), nullAndUndefinedToNone);
   },
-  mapOrElse<T, U>(this: Some<T>, _defaultFn: () => U, mapFn: (value: T) => U) {
-    return Some(mapFn(this.value));
+  mapOrElse<T, U>(
+    this: Some<T>,
+    _defaultFn: () => U,
+    mapFn: (value: T) => U,
+    nullAndUndefinedToNone: boolean = true
+  ) {
+    return Some(mapFn(this.value), nullAndUndefinedToNone);
   },
   and<T, U>(this: Some<T>, other: Option<U>) {
     return other;
@@ -789,9 +834,11 @@ const SomePrototype: OptionMethods<any> = {
  *
  * @group option
  */
-export function Some<T>(value: T | null | undefined): Option<T> {
-  // TODO: move this to an `Option()` function???
-  if (value === undefined || value === null) {
+export function Some<T>(
+  value: T | null | undefined,
+  nullAndUndefinedToNone: boolean = true
+): Option<T> {
+  if (nullAndUndefinedToNone && (value === undefined || value === null)) {
     return None;
   }
 
