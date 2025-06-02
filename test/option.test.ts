@@ -263,8 +263,23 @@ describe("Option", () => {
     expect(doubleNested1.strictEquals(doubleNested2)).toEqual(true);
   });
 
-  it("converts null and undefined to None", () => {
+  it("converts null and undefined to None by default", () => {
     const opt = Some<number>(null);
     expect(opt.isNone()).toBe(true);
+
+    const opt2 = Some<number>(undefined);
+    expect(opt2.isNone()).toBe(true);
+
+    const opt3 = Some<number>(null, false);
+    expect(opt3.isNone()).toBe(false);
+
+    const opt4 = Some<number>(undefined, false);
+    expect(opt4.isNone()).toBe(false);
+
+    const opt5 = opt3.map((x) => x);
+    expect(opt5.isNone()).toBe(true);
+
+    const opt6 = opt3.map((x) => x, false);
+    expect(opt6.isNone()).toBe(false);
   });
 });
