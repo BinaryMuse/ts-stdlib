@@ -830,6 +830,7 @@ const SomePrototype: OptionMethods<any> = {
  *
  * @typeParam T - The type of the wrapped value.
  * @param value - The value to wrap in a `Some`.
+ * @param nullAndUndefinedToNone - Whether to convert `null` and `undefined` to `None`; defaults to `true`.
  * @returns A `Some` value containing the given value.
  *
  * @group option
