@@ -71,33 +71,43 @@
  * }
  * ```
  *
- * You can convert functions that might throw into `Result`-returning functions using a wrapper:
+ * You can convert functions that might throw into `Result`-returning functions using the built-in `Ok.try()` method:
  *
  * ```typescript
- * function tryResult<T>(fn: () => T): Result<T, Error> {
- *   try {
- *     return Ok(fn());
- *   } catch (e) {
- *     return Err(e instanceof Error ? e : new Error(String(e)));
- *   }
- * }
- *
  * function divide(a: number, b: number): number {
  *   if (b === 0) throw new Error("Division by zero");
  *   return a / b;
  * }
  *
  * // Usage
- * const result = tryResult(() => divide(10, 2))
+ * const result = Ok.try(() => divide(10, 2))
  *   .map(value => value * 2)
  *   .unwrapOr(0);  // Returns 10
  *
- * const error = tryResult(() => divide(10, 0))
+ * const error = Ok.try(() => divide(10, 0))
  *   .map(value => value * 2)
  *   .unwrapOr(0);  // Returns 0
  * ```
  *
- * This pattern is particularly useful when working with existing APIs that might throw errors. The `tryResult` wrapper ensures that any thrown errors are properly captured and converted into a `Result` type.
+ * For async functions, you can convert Promises to Results using `Ok.from()`:
+ *
+ * ```typescript
+ * const result = await Ok.from(fetch("/api/data"))
+ *   .andThen(response => Ok.from(response.json()))
+ *   .mapErr(error => new Error(`Request failed: ${error}`));
+ * ```
+ *
+ * And convert Results back to Promises using `toPromise()`:
+ *
+ * ```typescript
+ * const result = Ok(42);
+ * const promise = result.toPromise(); // Promise<42>
+ *
+ * const error = Err(new Error("Something went wrong"));
+ * const promise2 = error.toPromise(); // Promise<never> (rejects)
+ * ```
+ *
+ * These methods make it easy to work with existing APIs that throw errors or return Promises while maintaining the benefits of the `Result` type.
  *
  * `Result` is particularly useful when you need to:
  *
@@ -535,6 +545,28 @@ interface ResultMethods<T, E> {
   err: () => Option<E>;
 
   /**
+   * Converts the `Result<T, E>` into a `Promise<T>`; useful for interacting with async code.
+   *
+   * @example
+   * ```typescript
+   * const result: Result<number, Error> = Ok(1);
+   * const promise = result.toPromise(); // Promise<1>
+   * const result2: Result<number, Error> = Err(new Error("error"));
+   * const promise2 = result2.toPromise(); // Promise<never>
+   *
+   * try {
+   *   const value = await result2.toPromise();
+   * } catch (e) {
+   *   console.log(e); // "error"
+   * }
+   * ```
+   *
+   * @returns {Promise<T>} A promise that resolves to the success value, or rejects with the error value.
+   * @group Transform Methods
+   */
+  toPromise: () => Promise<T>;
+
+  /**
    * Returns true if both results are `Ok` and their success values are equal using
    * the JavaScript `==` operator, or if both results are `Err` and their error values
    * are equal using the JavaScript `==` operator. If the inner values are `Result`s or
@@ -695,6 +727,9 @@ const OkPrototype: ResultMethods<any, any> = {
   err<T, E>(this: Ok<T, E>) {
     return None;
   },
+  toPromise<T>(this: Ok<T, any>) {
+    return Promise.resolve(this.value);
+  },
   equals<T, E>(this: Ok<T, E>, other: Result<T, E>) {
     if (other.isErr()) return false;
     const wrapped = (other as Ok<T, E>).value;
@@ -806,6 +841,9 @@ const ErrPrototype: ResultMethods<any, any> = {
   err<T, E>(this: Err<T, E>) {
     return Some(this.error);
   },
+  toPromise<T>(this: Err<T, any>) {
+    return Promise.reject(this.error);
+  },
   equals<T, E>(this: Err<T, E>, other: Result<T, E>) {
     if (other.isOk()) return false;
     const wrapped = (other as Err<T, E>).error;
@@ -856,6 +894,115 @@ export function Ok<T, E = never>(value: T): Result<T, E> {
     value: { value, enumerable: true, writable: false },
   });
 }
+
+/**
+ * Converts a `Promise<T>` into a `Result<T, E>`. Note that if the promise rejects, an `Err<E>` with the rejected value
+ * will be returned, even if the rejected value is not of type `E`.
+ *
+ * For type-safe error handling, use `mapErr` to transform and validate errors:
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = await Ok.from(Promise.resolve(42));
+ * console.log(result.unwrap()); // 42
+ *
+ * // Error handling with mapErr;
+ * // `result` is of type `Result<Response, NetworkError | UnknownError>`
+ * const result = (await Ok.from(fetch('/api/users')))
+ *   .mapErr((error: unknown) => {
+ *     if (error instanceof TypeError) {
+ *       return new NetworkError('Network request failed', { cause: error });
+ *     }
+ *     return new UnknownError('Unknown error occurred', { cause: error });
+ *   });
+ *
+ * // Handling specific error types;
+ * // `result` is of type `Result<DatabaseResponse, DuplicateEntryError | TableNotFoundError | DatabaseError | UnknownError>`
+ * const result = (await Ok.from(databaseQuery()))
+ *   .mapErr((error: unknown) => {
+ *     if (error instanceof DatabaseError) {
+ *       switch (error.code) {
+ *         case 'ER_DUP_ENTRY':
+ *           return new DuplicateEntryError('Record already exists');
+ *         case 'ER_NO_SUCH_TABLE':
+ *           return new TableNotFoundError('Table does not exist');
+ *         default:
+ *           return new DatabaseError('Database operation failed', { cause: error });
+ *       }
+ *     }
+ *     return new UnknownError('Unexpected error', { cause: error });
+ *   });
+ *
+ * // Handling AggregateError from Promise.allSettled;
+ * // `results` is of type `Result<PromiseSettledResult<number>[], ValidationError | UnknownError>`
+ * const results = await Ok.from(Promise.allSettled([promise1, promise2]))
+ *   .mapErr((error: unknown) => {
+ *     if (error instanceof AggregateError) {
+ *       return new ValidationError('Multiple errors occurred', error.errors);
+ *     }
+ *     return new UnknownError('Unexpected error', { cause: error });
+ *   });
+ *
+ * // Handling AbortError;
+ * // `result` is of type `Result<Response, CancelledError | NetworkError>`
+ * const result = await Ok.from(fetch(url, { signal: abortController.signal }))
+ *   .mapErr((error: unknown) => {
+ *     if (error instanceof AbortError) {
+ *       return new CancelledError('Request was cancelled');
+ *     }
+ *     return new NetworkError('Network request failed', { cause: error });
+ *   });
+ * ```
+ *
+ * @typeParam T - The type of the success value
+ * @typeParam E - The type of the error value; defaults to `unknown`
+ *
+ * @param promise - The promise to convert.
+ * @returns A `Result<T, E>` that resolves to the value of the promise if it resolves, or an `Err` if it rejects.
+ *
+ * @group result
+ */
+Ok.from = async <T, E = unknown>(
+  promise: Promise<T>
+): Promise<Result<Awaited<T>, E>> => {
+  try {
+    const value = await promise;
+    return Ok(value);
+  } catch (error) {
+    return Err(error as E);
+  }
+};
+
+/**
+ * Executes a function that might throw and returns a `Result` containing the return value or the thrown error.
+ *
+ * Note: TypeScript cannot automatically infer the error types from functions.
+ * You may need to provide explicit type annotations for better type safety.
+ *
+ * @example
+ * ```typescript
+ * const result = Ok.try(() => {
+ *   if (Math.random() > 0.5) throw new Error('Random failure');
+ *   return 42;
+ * });
+ * ```
+ *
+ * @typeParam T - The type of the return value
+ * @typeParam E - The type of the error; defaults to `unknown`
+ *
+ * @param fn - A function that might throw an error.
+ * @returns A `Result` containing the return value or the thrown error.
+ *
+ * @group result
+ */
+Ok.try = <T, E = unknown>(fn: () => T): Result<T, E> => {
+  try {
+    return Ok(fn());
+  } catch (error) {
+    return Err(error as E);
+  }
+};
 
 /**
  * Creates a new `Err` result.
