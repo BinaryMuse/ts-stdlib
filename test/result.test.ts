@@ -2,6 +2,25 @@ import { describe, it, expect } from "vitest";
 import { Result, Ok, Err, Some } from "../src/";
 
 describe("Result", () => {
+  it("from", async () => {
+    const promise: Promise<number> = Promise.resolve(1);
+    const result = await Ok.from(promise);
+    expect(result.unwrap()).toBe(1);
+
+    const promise2: Promise<number> = Promise.reject("error");
+    const result2 = await Ok.from(promise2);
+    expect(result2.isErr()).toBe(true);
+    expect(result2.unwrapErr()).toBe("error");
+
+    const promise3: Promise<number> = Promise.reject("error");
+    const result3 = (await Ok.from<number, string>(promise3)).mapErr((e) => {
+      return new Error(e);
+    });
+    expect(result3.isErr()).toBe(true);
+    expect(result3.unwrapErr()).toBeInstanceOf(Error);
+    expect(result3.unwrapErr().message).toBe("error");
+  });
+
   it("isOk and isErr", () => {
     const ok: Result<number, string> = Ok(1);
     const err: Result<number, string> = Err("error");
@@ -188,6 +207,35 @@ describe("Result", () => {
     expect(ok.err().isNone()).toEqual(true);
     expect(err.err().unwrap()).toEqual("error");
     expect(err.ok().isNone()).toEqual(true);
+  });
+
+  it("toPromise", async () => {
+    const ok: Result<number, string> = Ok(1);
+    const err: Result<number, string> = Err("custom error");
+    const errObj = new Error("custom error");
+    const errObjResult: Result<number, Error> = Err(errObj);
+
+    await expect(ok.toPromise()).resolves.toEqual(1);
+    await expect(err.toPromise()).rejects.toThrow("custom error");
+    await expect(errObjResult.toPromise()).rejects.toThrowError(errObj);
+
+    try {
+      await errObjResult.toPromise();
+    } catch (e) {
+      expect(e).toStrictEqual(errObj);
+    }
+  });
+
+  it("try", () => {
+    const successResult = Ok.try(() => 42);
+    expect(successResult.unwrap()).toBe(42);
+
+    const errorResult: Result<never, Error> = Ok.try(() => {
+      throw new Error("test error");
+    });
+    expect(errorResult.isErr()).toBe(true);
+    expect(errorResult.unwrapErr()).toBeInstanceOf(Error);
+    expect(errorResult.unwrapErr().message).toBe("test error");
   });
 
   it("equals", () => {
