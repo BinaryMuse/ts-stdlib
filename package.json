@@ -34,6 +34,6 @@
     "typedoc": "^0.28.1",
     "typedoc-plugin-missing-exports": "^4.0.0",
     "typescript": "^5.8.2",
-    "vitest": "^3.0.9"
+    "vitest": "^4.1.0"
   }
 }
